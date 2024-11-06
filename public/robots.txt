@@ -1,0 +1,6 @@
+# Taktak - Robots.txt
+# This is a local-first application, so we disallow all crawlers
+
+User-agent: *
+Disallow: /
+

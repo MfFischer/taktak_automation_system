@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # CouchDB - Cloud sync database
+  couchdb:
+    image: couchdb:3.3
+    container_name: taktak-couchdb
+    restart: unless-stopped
+    ports:
+      - '5984:5984'
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=changeme
+    volumes:
+      - couchdb_data:/opt/couchdb/data
+      - couchdb_config:/opt/couchdb/etc/local.d
+    networks:
+      - taktak-network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:5984/_up']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis - Job queue for BullMQ
+  redis:
+    image: redis:7-alpine
+    container_name: taktak-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - taktak-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Server - Express API and Worker
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    container_name: taktak-server
+    restart: unless-stopped
+    ports:
+      - '3001:3001'
+    environment:
+      - NODE_ENV=production
+      - SERVER_PORT=3001
+      - COUCHDB_URL=http://couchdb:5984
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=changeme
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    env_file:
+      - .env
+    volumes:
+      - ./apps/server:/app/apps/server
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/server/node_modules
+    depends_on:
+      couchdb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - taktak-network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Client - React frontend
+  client:
+    build:
+      context: .
+      dockerfile: apps/client/Dockerfile
+    container_name: taktak-client
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_API_URL=http://localhost:3001
+    volumes:
+      - ./apps/client:/app/apps/client
+      - /app/node_modules
+      - /app/apps/client/node_modules
+    depends_on:
+      - server
+    networks:
+      - taktak-network
+
+networks:
+  taktak-network:
+    driver: bridge
+
+volumes:
+  couchdb_data:
+    driver: local
+  couchdb_config:
+    driver: local
+  redis_data:
+    driver: local
+

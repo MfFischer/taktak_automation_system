@@ -40,6 +40,9 @@ lerna-debug.log*
 # PouchDB/CouchDB local data
 pouchdb_data/
 couchdb_data/
+taktak_local/
+taktak_local-mrview-*/
+nul
 
 # Redis
 redis_data/
