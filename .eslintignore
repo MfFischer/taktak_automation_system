@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+**/dist/
+**/build/
+
+# Generated files
+packages/types/dist/
+
+# Logs
+logs/
+*.log
+
+# Database
+pouchdb_data/
+couchdb_data/
+taktak_local/
+taktak_local-mrview-*/
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+.nyc_output/
+
