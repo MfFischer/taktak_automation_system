@@ -1,435 +1,255 @@
-# Taktak
+<div align="center">
+  <img src="./public/logo.png" alt="Taktak Logo" width="120" height="120">
+  
+  # ⚡ Taktak
+  
+  ### AI-Driven Offline-First Automation Platform
+  
+  *Shake off the manual work with intelligent workflow automation*
+  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+  [![React](https://img.shields.io/badge/React-18-61dafb)](https://reactjs.org/)
+  [![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
+  
+  [Features](#-features) • [Quick Start](#-quick-start) • [Architecture](#-architecture) • [Documentation](#-documentation)
+  
+</div>
 
-**"Shake off the manual work"**
+---
 
-Taktak is an AI-driven, offline-first automation platform built for local businesses and clinics that need automation but often operate offline or with limited internet access.
+## ✨ Features
 
-Unlike Zapier or Make.com, Taktak runs locally with PouchDB and automatically syncs to CouchDB when an internet connection is available. It uses Google Gemini API as a smart assistant, allowing business owners to describe tasks in natural language.
+<table>
+<tr>
+<td width="50%">
 
-## 🌟 Key Features
+### 🎨 **Visual Workflow Builder**
+Drag-and-drop interface powered by React Flow. Build complex automation workflows visually with 10+ pre-built nodes including Schedule, AI Generate, Database, SMS, Email, and more.
 
-- **Offline-First Architecture**: Works completely offline using PouchDB, syncs when online
-- **AI-Powered Workflow Creation**: Describe workflows in natural language using Google Gemini
-- **Local-First Operation**: All data stored locally, optional cloud sync
-- **Business-Focused Connectors**: POS systems, SMS/email, scheduling, inventory management
-- **Secure by Design**: Encrypted API keys, rate limiting, GDPR compliance features
-- **Production-Ready**: Docker support, health checks, comprehensive logging
+</td>
+<td width="50%">
 
-## 🎯 Target Use Cases
+### 🤖 **AI-Powered Assistant**
+Natural language workflow creation using Google Gemini. Simply describe what you want to automate, and let AI generate the workflow for you.
 
-Perfect for small businesses like:
-- **Grocery stores & pharmacies**: Stock monitoring, reorder alerts
-- **Clinics**: Patient reminders, appointment scheduling
-- **Printshops**: Order processing, job ticket generation
-- **Lending firms**: Application processing, document management
+</td>
+</tr>
+<tr>
+<td width="50%">
 
-## 🏗️ Architecture
+### 💾 **Offline-First Architecture**
+Works without internet using PouchDB local storage. Optional cloud sync to CouchDB when connectivity is available. Your data, your control.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    React Frontend (Vite)                     │
-│                  PouchDB (IndexedDB)                         │
-└──────────────────────┬──────────────────────────────────────┘
-                       │ Sync (bidirectional)
-┌──────────────────────┴──────────────────────────────────────┐
-│                    CouchDB (Cloud)                           │
-└──────────────────────┬──────────────────────────────────────┘
-                       │
-┌──────────────────────┴──────────────────────────────────────┐
-│              Express API + Workflow Engine                   │
-│                    BullMQ + Redis                            │
-└─────────────────────────────────────────────────────────────┘
-```
+</td>
+<td width="50%">
 
-## 📦 Tech Stack
+### 🔐 **Enterprise Security**
+JWT authentication, encrypted credentials, and secure data handling. Built with security best practices from the ground up.
 
-### Backend
-- **Runtime**: Node.js 18+ with TypeScript
-- **Framework**: Express.js
-- **Database**: PouchDB (local) + CouchDB (cloud sync)
-- **Job Queue**: BullMQ with Redis
-- **AI**: Google Gemini API
-- **Security**: Helmet, rate limiting, encryption
+</td>
+</tr>
+</table>
 
-### Frontend
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand
-- **Data Fetching**: React Query
-- **Routing**: React Router v6
-
-### DevOps
-- **Containerization**: Docker + Docker Compose
-- **Reverse Proxy**: Nginx (production)
-- **Logging**: Winston with daily rotation
-- **Monitoring**: Health checks, metrics
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ and npm 9+
-- Docker and Docker Compose (optional, recommended)
-- Git
+```bash
+Node.js 18+ • npm • (Optional) CouchDB for cloud sync
+```
 
 ### Installation
 
-1. **Clone the repository**
 ```bash
-git clone <repository-url>
+# Clone the repository
+git clone https://github.com/MfFischer/taktak.git
 cd taktak
-```
 
-2. **Install dependencies**
-```bash
+# Install dependencies
 npm install
+
+# Build shared types
+cd packages/types && npm run build && cd ../..
+
+# Start development servers
+npm run dev:server  # Terminal 1 - Backend (port 3001)
+npm run dev:client  # Terminal 2 - Frontend (port 3000)
 ```
 
-3. **Configure environment**
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
+### Environment Setup
 
-4. **Start with Docker (Recommended)**
-```bash
-npm run docker:up
-```
+Create `.env` in the root directory:
 
-Or **start manually**:
-```bash
-# Terminal 1: Start server
-npm run dev:server
-
-# Terminal 2: Start client
-npm run dev:client
-```
-
-5. **Access the application**
-- Frontend: http://localhost:3000
-- API: http://localhost:3001
-- CouchDB Admin: http://localhost:5984/_utils
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Key environment variables (see `.env.example` for full list):
-
-```bash
-# Server
-SERVER_PORT=3001
+```env
+# Server Configuration
+PORT=3001
 NODE_ENV=development
+JWT_SECRET=your-super-secret-jwt-key-change-this
+ENCRYPTION_KEY=your-32-character-encryption-key!!
 
-# Database
+# Optional: AI Features
+GEMINI_API_KEY=your-gemini-api-key
+
+# Optional: Cloud Sync
 COUCHDB_URL=http://localhost:5984
-COUCHDB_USER=admin
-COUCHDB_PASSWORD=changeme
+COUCHDB_USERNAME=admin
+COUCHDB_PASSWORD=password
 
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-# Security (CHANGE IN PRODUCTION!)
-JWT_SECRET=your_super_secret_jwt_key
-ENCRYPTION_KEY=your_32_character_encryption_key
-
-# External Services (Optional - can be added via UI)
-GEMINI_API_KEY=your_gemini_api_key
-TWILIO_ACCOUNT_SID=your_twilio_sid
-TWILIO_AUTH_TOKEN=your_twilio_token
+# Optional: Notifications
+TWILIO_ACCOUNT_SID=your-twilio-sid
+TWILIO_AUTH_TOKEN=your-twilio-token
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
 ```
 
-### API Keys
+### 🎉 You're Ready!
 
-API keys can be configured in two ways:
-1. **Via UI** (Recommended): Settings → API Keys
-2. **Via Environment**: Set in `.env` file
+Open [http://localhost:3000](http://localhost:3000) and start automating!
 
-Supported services:
-- Google Gemini (AI features)
-- Twilio (SMS)
-- SMTP (Email)
-- Shopify/Square (POS integration)
+---
 
-## 📚 Usage
+## 🏗️ Architecture
 
-### Creating a Workflow
+<div align="center">
 
-#### Option 1: AI Assistant (Natural Language)
+```mermaid
+graph TB
+    A[React Frontend] -->|REST API| B[Express Backend]
+    B -->|Local Storage| C[PouchDB]
+    C -->|Optional Sync| D[CouchDB]
+    B -->|AI Generation| E[Google Gemini]
+    B -->|Notifications| F[Twilio/SMTP]
+    B -->|Scheduling| G[Node-Cron]
+```
 
-1. Navigate to **AI Assistant**
-2. Describe your workflow:
-   ```
-   "Send an SMS reminder to patients every morning at 8 AM"
-   ```
-3. Review the generated workflow
-4. Save and activate
+</div>
 
-#### Option 2: Manual Creation
+### Tech Stack
 
-1. Navigate to **Workflows** → **New Workflow**
-2. Add nodes (trigger, actions, conditions)
-3. Connect nodes to define flow
-4. Configure each node
-5. Save and activate
+<table>
+<tr>
+<td><b>Frontend</b></td>
+<td>React 18 • TypeScript • Vite • Tailwind CSS • React Flow • React Router</td>
+</tr>
+<tr>
+<td><b>Backend</b></td>
+<td>Node.js • Express • TypeScript • PouchDB • JWT • Google Gemini AI</td>
+</tr>
+<tr>
+<td><b>DevOps</b></td>
+<td>Docker • Docker Compose • GitHub Actions • npm Workspaces</td>
+</tr>
+</table>
 
-### Available Node Types
+---
 
-**Triggers**
-- Schedule (cron-based)
-- Webhook
-- Database Watch
+## 📦 Available Workflow Nodes
 
-**Actions**
-- Send SMS (Twilio)
-- Send Email (SMTP)
-- Database Query/Insert/Update
-- HTTP Request
-- CSV Import/Export
+| Node | Description | Use Case |
+|------|-------------|----------|
+| ⏰ **Schedule** | Cron-based triggers | Run workflows at specific times |
+| 🔀 **Condition** | Branching logic | If/else workflow paths |
+| 💾 **Database** | CRUD operations | Store and retrieve data |
+| 📱 **SMS** | Twilio integration | Send text messages |
+| 📧 **Email** | SMTP support | Send email notifications |
+| 🤖 **AI Generate** | Gemini AI | Generate text content |
+| 🔗 **Webhook** | External triggers | Receive HTTP callbacks |
+| 🌐 **HTTP Request** | API calls | Integrate with external services |
+| 📊 **CSV Import/Export** | Data handling | Process CSV files |
 
-**Logic**
-- Condition (if/else)
-- Loop
-- Delay
-
-**AI**
-- AI Generate (text generation)
-- AI Parse (data extraction)
-
-**Integrations**
-- POS (Shopify, Square)
-- Cloud Sync
-
-## 🔒 Security
-
-### Best Practices
-
-1. **Never commit secrets**: Use `.env` file (gitignored)
-2. **Change default keys**: Update `JWT_SECRET` and `ENCRYPTION_KEY` in production
-3. **Use HTTPS**: Always use HTTPS in production
-4. **Rate limiting**: Enabled by default (100 req/15min)
-5. **API key encryption**: All API keys encrypted at rest
-6. **Regular updates**: Keep dependencies updated
-
-### GDPR Compliance
-
-- **Data minimization**: Only collect necessary data
-- **Right to erasure**: Delete workflows and executions
-- **Data portability**: Export workflows as JSON
-- **Consent management**: Document in privacy policy
-- **Local-first**: Sensitive data can stay local-only
+---
 
 ## 🐳 Docker Deployment
 
-### Development
 ```bash
+# Build and run all services
 docker-compose up -d
+
+# Services available at:
+# - Frontend: http://localhost:3000
+# - Backend: http://localhost:3001
+# - CouchDB: http://localhost:5984
 ```
 
-### Production
-
-1. **Build images**
-```bash
-docker-compose -f docker-compose.prod.yml build
-```
-
-2. **Deploy**
-```bash
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-3. **Monitor**
-```bash
-docker-compose logs -f
-```
-
-### Health Checks
-
-- **Basic**: `GET /health`
-- **Detailed**: `GET /health/detailed`
-- **Readiness**: `GET /health/ready`
-- **Liveness**: `GET /health/live`
-
-## 📖 API Documentation
-
-### Workflows
-
-```bash
-# List workflows
-GET /api/workflows?status=active&page=1&limit=20
-
-# Get workflow
-GET /api/workflows/:id
-
-# Create workflow
-POST /api/workflows
-{
-  "name": "Daily Reminders",
-  "description": "Send reminders every morning",
-  "status": "draft",
-  "nodes": [...],
-  "connections": [...],
-  "trigger": {...}
-}
-
-# Update workflow
-PUT /api/workflows/:id
-
-# Delete workflow
-DELETE /api/workflows/:id
-
-# Execute workflow
-POST /api/workflows/:id/execute
-```
-
-### Executions
-
-```bash
-# List executions
-GET /api/executions?workflowId=xxx&status=success
-
-# Get execution
-GET /api/executions/:id
-
-# Cancel execution
-POST /api/executions/:id/cancel
-
-# Retry execution
-POST /api/executions/:id/retry
-```
-
-### AI
-
-```bash
-# Interpret natural language
-POST /api/ai/interpret
-{
-  "prompt": "Send SMS to customers when stock is low",
-  "apiKey": "optional_user_key",
-  "dryRun": false
-}
-
-# Validate workflow
-POST /api/ai/validate
-{
-  "workflow": {...}
-}
-```
+---
 
 ## 🧪 Testing
 
 ```bash
-# Run all tests
-npm test
-
 # Run server tests
-npm test --workspace=@taktak/server
+cd apps/server && npm test
 
 # Run with coverage
-npm run test:coverage
+npm test -- --coverage
 ```
 
-## 🛠️ Development
+---
 
-### Project Structure
+## 📁 Project Structure
 
 ```
 taktak/
 ├── apps/
-│   ├── client/          # React frontend
+│   ├── client/              # React frontend application
 │   │   ├── src/
-│   │   │   ├── components/
-│   │   │   ├── pages/
-│   │   │   ├── services/
-│   │   │   └── utils/
+│   │   │   ├── components/  # Reusable UI components
+│   │   │   ├── pages/       # Page components
+│   │   │   └── ...
 │   │   └── package.json
-│   └── server/          # Express backend
+│   └── server/              # Express backend application
 │       ├── src/
-│       │   ├── config/
-│       │   ├── routes/
-│       │   ├── services/
-│       │   ├── engine/
-│       │   ├── middleware/
-│       │   └── utils/
+│       │   ├── engine/      # Workflow execution engine
+│       │   ├── routes/      # API endpoints
+│       │   ├── services/    # Business logic
+│       │   └── ...
 │       └── package.json
 ├── packages/
-│   └── types/           # Shared TypeScript types
-├── docker-compose.yml
-├── package.json
-└── README.md
+│   └── types/               # Shared TypeScript definitions
+├── docker-compose.yml       # Docker orchestration
+└── package.json             # Root workspace configuration
 ```
-
-### Code Quality
-
-```bash
-# Lint
-npm run lint
-
-# Format
-npm run format
-
-# Type check
-npm run type-check
-```
-
-### Adding a New Node Type
-
-1. Add type to `packages/types/src/index.ts`
-2. Create handler in `apps/server/src/engine/nodes/`
-3. Register in `apps/server/src/engine/nodeExecutor.ts`
-4. Add UI component in `apps/client/src/components/nodes/`
-
-## 📊 Monitoring
-
-### Logs
-
-Logs are stored in `./logs/` with daily rotation:
-- `app-YYYY-MM-DD.log`: All logs
-- `app-error-YYYY-MM-DD.log`: Error logs only
-
-### Metrics
-
-Access metrics via:
-- Health endpoint: `/health/detailed`
-- Database info: Check PouchDB/CouchDB admin panels
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Commit Convention
-
-- `feat:` New feature
-- `fix:` Bug fix
-- `docs:` Documentation
-- `style:` Formatting
-- `refactor:` Code restructuring
-- `test:` Tests
-- `chore:` Maintenance
-
-## 📄 License
-
-MIT License - see LICENSE file for details
-
-## 🙏 Acknowledgments
-
-- Google Gemini for AI capabilities
-- PouchDB/CouchDB for offline-first sync
-- The open-source community
-
-## 📞 Support
-
-- **Documentation**: See `/docs` folder
-- **Issues**: GitHub Issues
-- **Email**: support@taktak.example
 
 ---
 
-**Built with ❤️ for local businesses that need reliable automation**
+## 🤝 Contributing
+
+We welcome contributions! Here's how you can help:
+
+1. 🍴 Fork the repository
+2. 🌿 Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. 💾 Commit your changes (`git commit -m 'Add amazing feature'`)
+4. 📤 Push to the branch (`git push origin feature/amazing-feature`)
+5. 🎉 Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+Built with amazing open-source tools:
+
+- [React Flow](https://reactflow.dev/) - Beautiful workflow visualization
+- [Google Gemini](https://ai.google.dev/) - Powerful AI capabilities
+- [PouchDB](https://pouchdb.com/) - Reliable offline-first database
+- [Tailwind CSS](https://tailwindcss.com/) - Modern utility-first CSS
+
+---
+
+<div align="center">
+  
+  **Built with ❤️ for local businesses and clinics**
+  
+  *Taktak - Shake off the manual work* ⚡
+  
+</div>
 
