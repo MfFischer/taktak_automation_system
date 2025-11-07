@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   User, Key, Cloud, Bell, Shield, Zap,
   Save, Eye, EyeOff, Copy, Check, Mail,
-  MessageSquare, Database, Lock, Sparkles
+  MessageSquare, Database, Lock, Sparkles, Brain
 } from 'lucide-react';
+import { api } from '../services/api';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -31,11 +32,37 @@ export default function Settings() {
     password: ''
   });
 
+  const [aiMode, setAIMode] = useState<'cloud' | 'local' | 'auto'>('auto');
+
+  // Load AI mode on mount
+  useEffect(() => {
+    const loadAIMode = async () => {
+      try {
+        const response = await api.ai.getMode() as any;
+        if (response.data?.mode) {
+          setAIMode(response.data.mode);
+        }
+      } catch (error) {
+        console.error('Failed to load AI mode:', error);
+      }
+    };
+    loadAIMode();
+  }, []);
+
   const handleSave = async () => {
     setIsSaving(true);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     setIsSaving(false);
+  };
+
+  const handleAIModeChange = async (mode: 'cloud' | 'local' | 'auto') => {
+    try {
+      await api.ai.setMode(mode);
+      setAIMode(mode);
+    } catch (error) {
+      console.error('Failed to update AI mode:', error);
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -47,6 +74,7 @@ export default function Settings() {
   const tabs = [
     { id: 'profile', name: 'Profile', icon: User },
     { id: 'api-keys', name: 'API Keys', icon: Key },
+    { id: 'ai-settings', name: 'AI Settings', icon: Brain },
     { id: 'cloud-sync', name: 'Cloud Sync', icon: Cloud },
     { id: 'notifications', name: 'Notifications', icon: Bell },
     { id: 'security', name: 'Security', icon: Shield },
@@ -261,6 +289,150 @@ export default function Settings() {
             </div>
           )}
 
+          {/* AI Settings Tab */}
+          {activeTab === 'ai-settings' && (
+            <div className="card-elevated space-y-6 animate-fade-in-up">
+              <div className="flex items-center space-x-3 pb-6 border-b border-dark-border">
+                <div className="p-3 bg-gradient-taktak rounded-xl shadow-glow">
+                  <Brain className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">AI Settings</h2>
+                  <p className="text-sm text-gray-400">Configure AI mode and preferences</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                {/* AI Mode Selection */}
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-2">AI Mode</h3>
+                    <p className="text-sm text-gray-400 mb-4">
+                      Choose how Taktak generates workflows with AI
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4">
+                    {/* Cloud Mode */}
+                    <button
+                      type="button"
+                      onClick={() => handleAIModeChange('cloud')}
+                      className={`p-4 rounded-xl border-2 transition-all text-left ${
+                        aiMode === 'cloud'
+                          ? 'border-taktak-500 bg-taktak-500/10'
+                          : 'border-dark-border hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className={`p-2 rounded-lg ${aiMode === 'cloud' ? 'bg-taktak-500' : 'bg-dark-hover'}`}>
+                          <Cloud className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold text-white">Cloud AI (Gemini)</h4>
+                            {aiMode === 'cloud' && (
+                              <span className="px-2 py-1 text-xs font-semibold text-white bg-taktak-500 rounded-full">
+                                Active
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-400 mt-1">
+                            Always use Google Gemini for AI generation. Requires API key and internet connection.
+                          </p>
+                          <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                            <span>✓ Best quality</span>
+                            <span>✓ Latest models</span>
+                            <span>⚠ Requires internet</span>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Local Mode */}
+                    <button
+                      type="button"
+                      onClick={() => handleAIModeChange('local')}
+                      className={`p-4 rounded-xl border-2 transition-all text-left ${
+                        aiMode === 'local'
+                          ? 'border-taktak-500 bg-taktak-500/10'
+                          : 'border-dark-border hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className={`p-2 rounded-lg ${aiMode === 'local' ? 'bg-taktak-500' : 'bg-dark-hover'}`}>
+                          <Brain className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold text-white">Local AI (Phi-3)</h4>
+                            {aiMode === 'local' && (
+                              <span className="px-2 py-1 text-xs font-semibold text-white bg-taktak-500 rounded-full">
+                                Active
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-400 mt-1">
+                            Always use local Phi-3 model. Works offline, no API key needed.
+                          </p>
+                          <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                            <span>✓ Fully offline</span>
+                            <span>✓ Privacy-first</span>
+                            <span>⚠ Requires model download</span>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Auto Mode */}
+                    <button
+                      type="button"
+                      onClick={() => handleAIModeChange('auto')}
+                      className={`p-4 rounded-xl border-2 transition-all text-left ${
+                        aiMode === 'auto'
+                          ? 'border-taktak-500 bg-taktak-500/10'
+                          : 'border-dark-border hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className={`p-2 rounded-lg ${aiMode === 'auto' ? 'bg-taktak-500' : 'bg-dark-hover'}`}>
+                          <Sparkles className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold text-white">Auto (Recommended)</h4>
+                            {aiMode === 'auto' && (
+                              <span className="px-2 py-1 text-xs font-semibold text-white bg-taktak-500 rounded-full">
+                                Active
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-400 mt-1">
+                            Try cloud AI first, automatically fallback to local if offline or API fails.
+                          </p>
+                          <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                            <span>✓ Best of both</span>
+                            <span>✓ Automatic fallback</span>
+                            <span>✓ Always available</span>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Model Info */}
+                <div className="p-4 bg-dark-hover rounded-xl border border-dark-border">
+                  <h4 className="font-semibold text-white mb-2">Local Model Setup</h4>
+                  <p className="text-sm text-gray-400 mb-3">
+                    To use local AI, download the Phi-3 model (~2.4GB):
+                  </p>
+                  <code className="block p-3 bg-dark-card rounded-lg text-xs text-gray-300 font-mono overflow-x-auto">
+                    See apps/server/models/README.md for download instructions
+                  </code>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Cloud Sync Tab */}
           {activeTab === 'cloud-sync' && (

@@ -89,5 +89,44 @@ router.post(
   })
 );
 
+/**
+ * Get current AI mode
+ * GET /api/ai/mode
+ */
+router.get(
+  '/mode',
+  asyncHandler(async (_req: Request, res: Response) => {
+    const mode = aiService.getAIMode();
+
+    res.json({
+      success: true,
+      data: { mode },
+    });
+  })
+);
+
+/**
+ * Set AI mode
+ * POST /api/ai/mode
+ */
+router.post(
+  '/mode',
+  validateBody(
+    Joi.object({
+      mode: Joi.string().valid('cloud', 'local', 'auto').required(),
+    })
+  ),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { mode } = req.body;
+
+    aiService.setAIMode(mode);
+
+    res.json({
+      success: true,
+      data: { mode },
+    });
+  })
+);
+
 export default router;
 

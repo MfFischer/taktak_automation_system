@@ -10,20 +10,75 @@ import { config } from '../config/environment';
 import { logger } from '../utils/logger';
 import { ValidationError, ExternalServiceError } from '../utils/errors';
 import { SettingsService } from './settingsService';
+import { localLLMService } from './localLLMService';
+
+type AIMode = 'cloud' | 'local' | 'auto';
 import { WorkflowService } from './workflowService';
 
 export class AIService {
   private settingsService = new SettingsService();
   private workflowService = new WorkflowService();
+  private aiMode: AIMode;
+
+  constructor() {
+    this.aiMode = (process.env.AI_MODE as AIMode) || 'auto';
+  }
+
+  /**
+   * Get current AI mode
+   */
+  getAIMode(): AIMode {
+    return this.aiMode;
+  }
+
+  /**
+   * Set AI mode
+   */
+  setAIMode(mode: AIMode): void {
+    this.aiMode = mode;
+    logger.info('AI mode changed', { mode });
+  }
 
   /**
    * Interprets natural language prompt into workflow
+   * Supports cloud (Gemini), local (Phi-3), and auto (fallback) modes
    */
   async interpretPrompt(
     prompt: string,
     userApiKey?: string,
     dryRun: boolean = false
-  ): Promise<{ workflow: Partial<Workflow>; confidence: number; suggestions?: string[] }> {
+  ): Promise<{ workflow: Partial<Workflow>; confidence: number; suggestions?: string[]; source: 'cloud' | 'local' }> {
+    // Try cloud first if mode is cloud or auto
+    if (this.aiMode === 'cloud' || this.aiMode === 'auto') {
+      try {
+        return await this.interpretWithCloud(prompt, userApiKey, dryRun);
+      } catch (error) {
+        logger.warn('Cloud AI failed', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+
+        // If mode is cloud-only, throw error
+        if (this.aiMode === 'cloud') {
+          throw error;
+        }
+
+        // Otherwise, fallback to local
+        logger.info('Falling back to local AI');
+      }
+    }
+
+    // Use local AI
+    return await this.interpretWithLocal(prompt, dryRun);
+  }
+
+  /**
+   * Interpret prompt using cloud AI (Gemini)
+   */
+  private async interpretWithCloud(
+    prompt: string,
+    userApiKey?: string,
+    dryRun: boolean = false
+  ): Promise<{ workflow: Partial<Workflow>; confidence: number; suggestions?: string[]; source: 'cloud' }> {
     const apiKey = userApiKey || config.services.gemini.apiKey || (await this.settingsService.getApiKey('gemini'));
 
     if (!apiKey) {
@@ -51,7 +106,7 @@ export class AIService {
         this.validateGeneratedWorkflow(workflow);
       }
 
-      logger.info('Workflow generated from prompt', {
+      logger.info('Workflow generated from prompt (cloud)', {
         nodeCount: workflow.nodes?.length || 0,
       });
 
@@ -62,9 +117,10 @@ export class AIService {
         workflow,
         confidence,
         suggestions: this.generateSuggestions(workflow),
+        source: 'cloud',
       };
     } catch (error) {
-      logger.error('Failed to interpret prompt', {
+      logger.error('Failed to interpret prompt with cloud AI', {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
 
@@ -73,6 +129,54 @@ export class AIService {
       }
 
       throw new ExternalServiceError('Gemini', error instanceof Error ? error.message : undefined);
+    }
+  }
+
+  /**
+   * Interpret prompt using local AI (Phi-3)
+   */
+  private async interpretWithLocal(
+    prompt: string,
+    dryRun: boolean = false
+  ): Promise<{ workflow: Partial<Workflow>; confidence: number; suggestions?: string[]; source: 'local' }> {
+    try {
+      logger.info('Using local AI', { promptLength: prompt.length });
+
+      // Initialize local LLM if not already done
+      if (!localLLMService.isAvailable()) {
+        await localLLMService.initialize();
+      }
+
+      // Generate workflow JSON using local LLM
+      const text = await localLLMService.interpretPrompt(prompt);
+
+      // Parse JSON from response
+      const workflow = this.parseWorkflowFromResponse(text);
+
+      // Validate workflow structure
+      if (!dryRun) {
+        this.validateGeneratedWorkflow(workflow);
+      }
+
+      logger.info('Workflow generated from prompt (local)', {
+        nodeCount: workflow.nodes?.length || 0,
+      });
+
+      // Calculate confidence score (slightly lower for local AI)
+      const confidence = this.calculateConfidenceScore(workflow, prompt) * 0.95;
+
+      return {
+        workflow,
+        confidence,
+        suggestions: this.generateSuggestions(workflow),
+        source: 'local',
+      };
+    } catch (error) {
+      logger.error('Failed to interpret prompt with local AI', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+
+      throw new ExternalServiceError('Local LLM', error instanceof Error ? error.message : undefined);
     }
   }
 

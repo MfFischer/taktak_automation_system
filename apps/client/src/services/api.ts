@@ -132,6 +132,14 @@ export const api = {
 
     suggestions: (workflowId: string) =>
       apiRequest(`/api/ai/suggestions/${workflowId}`),
+
+    getMode: () => apiRequest('/api/ai/mode', { method: 'GET' }),
+
+    setMode: (mode: 'cloud' | 'local' | 'auto') =>
+      apiRequest('/api/ai/mode', {
+        method: 'POST',
+        body: JSON.stringify({ mode }),
+      }),
   },
 
   // Settings
