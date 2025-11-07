@@ -42,6 +42,8 @@ pouchdb_data/
 couchdb_data/
 taktak_local/
 taktak_local-mrview-*/
+subscriptions/
+subscriptions-mrview-*/
 nul
 
 # Redis

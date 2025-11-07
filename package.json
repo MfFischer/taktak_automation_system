@@ -78,22 +78,32 @@
       {
         "from": "apps/server/dist",
         "to": "server",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "icon": "public/logo.png",
       "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "mac": {
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "icon": "public/logo.png",
       "category": "public.app-category.productivity",
       "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "icon": "public/logo.png",
       "category": "Office",
       "artifactName": "${productName}-${version}-${arch}.${ext}"
@@ -105,5 +115,8 @@
       "createStartMenuShortcut": true,
       "shortcutName": "Taktak"
     }
+  },
+  "dependencies": {
+    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0"
   }
 }

@@ -25,6 +25,7 @@ import settingsRoutes from './routes/settings';
 import aiRoutes from './routes/ai';
 import templateRoutes from './routes/templates';
 import licenseRoutes from './routes/license';
+import lemonsqueezyRoutes from './routes/lemonsqueezy';
 
 /**
  * Creates and configures Express application
@@ -83,6 +84,7 @@ export function createApp(): Application {
   app.use('/api/ai', aiRoutes);
   app.use('/api/templates', templateRoutes);
   app.use('/api/license', licenseRoutes);
+  app.use('/api/lemonsqueezy', lemonsqueezyRoutes);
 
   // Root endpoint
   app.get('/', (_req, res) => {
