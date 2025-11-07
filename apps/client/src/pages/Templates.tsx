@@ -75,7 +75,13 @@ export default function Templates() {
       navigate('/app/workflows');
     } catch (error) {
       console.error('Failed to import template:', error);
-      alert('Failed to import template. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+      if (errorMessage.includes('Invalid token') || errorMessage.includes('Token expired')) {
+        alert('Your session has expired. Please log in again.');
+      } else {
+        alert(`Failed to import template: ${errorMessage}`);
+      }
     }
   };
 

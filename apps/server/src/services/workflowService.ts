@@ -14,6 +14,32 @@ export class WorkflowService {
   private db = getLocalDatabase();
   private engine = new WorkflowEngine();
 
+  constructor() {
+    // Create index for efficient querying
+    this.createIndexes().catch((error) => {
+      logger.error('Failed to create workflow indexes', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    });
+  }
+
+  /**
+   * Create database indexes for efficient querying
+   */
+  private async createIndexes(): Promise<void> {
+    try {
+      await this.db.createIndex({
+        index: {
+          fields: ['type', 'userId', 'createdAt'],
+        },
+      });
+      logger.debug('Workflow indexes created');
+    } catch (error) {
+      // Index might already exist, ignore error
+      logger.debug('Workflow indexes already exist or failed to create');
+    }
+  }
+
   /**
    * Creates a new workflow
    */
@@ -53,8 +79,9 @@ export class WorkflowService {
     tags?: string[];
     page: number;
     limit: number;
+    userId?: string;
   }): Promise<{ workflows: Workflow[]; total: number }> {
-    const { status, tags, page, limit } = options;
+    const { status, tags, page, limit, userId } = options;
     const skip = (page - 1) * limit;
 
     try {
@@ -62,6 +89,11 @@ export class WorkflowService {
       const selector: Record<string, unknown> = {
         type: 'workflow',
       };
+
+      // Filter by userId if provided (for user-specific workflows)
+      if (userId) {
+        selector.userId = userId;
+      }
 
       if (status) {
         selector.status = status;
@@ -73,9 +105,13 @@ export class WorkflowService {
 
       const result = await this.db.find({
         selector,
-        sort: [{ createdAt: 'desc' }],
         limit,
         skip,
+      });
+
+      // Sort in memory since PouchDB doesn't have the index yet
+      const sortedDocs = (result.docs as Workflow[]).sort((a, b) => {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
 
       // Get total count
@@ -85,7 +121,7 @@ export class WorkflowService {
       });
 
       return {
-        workflows: result.docs as Workflow[],
+        workflows: sortedDocs,
         total: countResult.docs.length,
       };
     } catch (error) {

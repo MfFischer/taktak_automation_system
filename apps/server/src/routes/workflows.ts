@@ -110,12 +110,14 @@ router.get(
     };
 
     const tagArray = tags ? tags.split(',').map((t) => t.trim()) : undefined;
+    const userId = (req as any).user?.id;
 
     const result = await workflowService.listWorkflows({
       status,
       tags: tagArray,
       page,
       limit,
+      userId, // Filter by authenticated user
     });
 
     res.json({
