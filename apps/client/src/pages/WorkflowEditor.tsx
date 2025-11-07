@@ -51,7 +51,7 @@ export default function WorkflowEditor() {
 
       try {
         setIsLoading(true);
-        const response = await api.workflows.get(id);
+        const response = await api.workflows.get(id) as any;
         const workflowData = response.data;
         setWorkflow(workflowData);
         setWorkflowName(workflowData.name);

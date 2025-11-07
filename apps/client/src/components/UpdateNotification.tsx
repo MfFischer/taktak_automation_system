@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Download, X, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 
 interface UpdateStatus {

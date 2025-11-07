@@ -16,7 +16,7 @@ import {
   searchTemplatesByTags,
   searchTemplates,
 } from '../data/templates';
-import { TemplateCategory, TemplateDifficulty } from '@taktak/types';
+import { TemplateCategory, TemplateDifficulty, WorkflowStatus } from '@taktak/types';
 
 const router = Router();
 const workflowService = new WorkflowService();
@@ -156,10 +156,11 @@ router.post(
     ];
 
     const workflowData = {
+      type: 'workflow' as const,
       name: customName || template.name,
       description: customDescription || template.description,
       userId,
-      status: 'draft' as const,
+      status: WorkflowStatus.DRAFT,
       nodes: allNodes,
       connections: template.workflow.connections || [],
       trigger: template.workflow.trigger,

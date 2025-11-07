@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Download, Zap, Shield, Wifi, WifiOff, Sparkles, Play,
-  Check, Star, ArrowRight, Monitor, Smartphone, Cloud,
-  Lock, Workflow, Bot, Database, MessageSquare, Mail
+  Download, Zap, Shield, WifiOff, Sparkles, Play,
+  Star, Workflow, Bot, Database
 } from 'lucide-react';
 
 export default function Desktop() {

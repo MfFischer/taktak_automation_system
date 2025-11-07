@@ -78,7 +78,12 @@
       "apps/client/dist/**/*",
       "apps/server/dist/**/*",
       "public/**/*",
-      "node_modules/**/*"
+      "!node_modules/**/*",
+      "node_modules/@lemonsqueezy/**/*",
+      "node_modules/electron-updater/**/*"
+    ],
+    "asarUnpack": [
+      "apps/server/dist/**/*"
     ],
     "extraResources": [
       {
@@ -91,28 +96,53 @@
     ],
     "win": {
       "target": [
-        "nsis"
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
       ],
       "icon": "public/logo.png",
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "signAndEditExecutable": false,
+      "verifyUpdateCodeSignature": false
     },
     "mac": {
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
       ],
       "icon": "public/logo.png",
       "category": "public.app-category.productivity",
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
     },
     "linux": {
       "target": [
-        "AppImage",
-        "deb"
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        }
       ],
       "icon": "public/logo.png",
       "category": "Office",
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "maintainer": "Taktak Team <support@taktak.app>",
+      "vendor": "Taktak",
+      "synopsis": "AI-driven offline-first automation platform",
+      "description": "Taktak is an AI-driven offline-first automation platform for local businesses. Build powerful workflows without coding."
     },
     "nsis": {
       "oneClick": false,

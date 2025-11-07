@@ -94,14 +94,14 @@ router.post(
         userId: user.id,
         variantId,
         productType,
-        checkoutId: checkout.data.id,
+        checkoutId: (checkout.data as any).id,
       });
 
       return res.json({
         success: true,
         data: {
-          checkoutUrl: checkout.data.attributes.url,
-          checkoutId: checkout.data.id,
+          checkoutUrl: (checkout.data as any).attributes.url,
+          checkoutId: (checkout.data as any).id,
         },
       });
     } catch (error) {

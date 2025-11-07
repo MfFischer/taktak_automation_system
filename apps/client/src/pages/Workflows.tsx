@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Play, Pause, Trash2, Edit, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Pause, Trash2, Edit, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { api } from '../services/api';
 
 interface Workflow {
@@ -25,7 +25,7 @@ export default function Workflows() {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.workflows.list();
+      const response = await api.workflows.list() as any;
       // Handle both response formats: data.workflows or data (array)
       const workflowsData = Array.isArray(response.data) ? response.data : response.data.workflows || [];
       setWorkflows(workflowsData);
