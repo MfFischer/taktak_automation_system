@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -19,6 +19,7 @@ import toast from 'react-hot-toast';
 import { NodeType } from '@taktak/types';
 import CustomNode from './CustomNode';
 import NodePalette from './NodePalette';
+import NodeConfigPanel from './NodeConfigPanel';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -42,6 +43,21 @@ export default function WorkflowCanvas({
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [showConfigPanel, setShowConfigPanel] = useState(false);
+
+  // Update nodes when initialNodes change
+  useEffect(() => {
+    if (initialNodes.length > 0) {
+      setNodes(initialNodes);
+    }
+  }, [initialNodes, setNodes]);
+
+  // Update edges when initialEdges change
+  useEffect(() => {
+    if (initialEdges.length > 0) {
+      setEdges(initialEdges);
+    }
+  }, [initialEdges, setEdges]);
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -54,9 +70,37 @@ export default function WorkflowCanvas({
     setSelectedNode(node);
   }, []);
 
+  const onNodeDoubleClick = useCallback((_event: React.MouseEvent, node: Node) => {
+    setSelectedNode(node);
+    setShowConfigPanel(true);
+  }, []);
+
   const onPaneClick = useCallback(() => {
     setSelectedNode(null);
+    setShowConfigPanel(false);
   }, []);
+
+  const handleUpdateNodeConfig = useCallback(
+    (nodeId: string, newConfig: any) => {
+      setNodes((nds) =>
+        nds.map((node) => {
+          if (node.id === nodeId) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                label: newConfig.label || node.data.label,
+                config: newConfig,
+              },
+            };
+          }
+          return node;
+        })
+      );
+      toast.success('Node configuration updated');
+    },
+    [setNodes]
+  );
 
   const handleAddNode = useCallback(
     (type: NodeType) => {
@@ -116,6 +160,7 @@ export default function WorkflowCanvas({
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
+          onNodeDoubleClick={onNodeDoubleClick}
           onPaneClick={onPaneClick}
           nodeTypes={nodeTypes}
           fitView
@@ -156,13 +201,21 @@ export default function WorkflowCanvas({
           </Panel>
 
           {/* Selected Node Actions */}
-          {selectedNode && (
+          {selectedNode && !showConfigPanel && (
             <Panel position="top-left" className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
               <h3 className="font-medium mb-2">
                 {selectedNode.data.label}
               </h3>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
                 <button
+                  type="button"
+                  onClick={() => setShowConfigPanel(true)}
+                  className="btn btn-primary text-sm"
+                >
+                  Configure
+                </button>
+                <button
+                  type="button"
                   onClick={handleDeleteNode}
                   className="btn btn-danger text-sm"
                 >
@@ -173,6 +226,15 @@ export default function WorkflowCanvas({
           )}
         </ReactFlow>
       </div>
+
+      {/* Node Configuration Panel */}
+      {showConfigPanel && selectedNode && (
+        <NodeConfigPanel
+          node={selectedNode}
+          onClose={() => setShowConfigPanel(false)}
+          onUpdate={handleUpdateNodeConfig}
+        />
+      )}
     </div>
   );
 }
