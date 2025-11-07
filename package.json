@@ -2,6 +2,7 @@
   "name": "taktak",
   "version": "1.0.0",
   "description": "AI-driven offline-first automation platform for local businesses",
+  "main": "electron/main.js",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -11,9 +12,14 @@
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "npm run dev --workspace=@taktak/server",
     "dev:client": "npm run dev --workspace=@taktak/client",
+    "dev:electron": "cross-env NODE_ENV=development electron .",
     "build": "npm run build --workspaces",
     "build:server": "npm run build --workspace=@taktak/server",
     "build:client": "npm run build --workspace=@taktak/client",
+    "build:electron": "npm run build && electron-builder",
+    "build:electron:win": "npm run build && electron-builder --win",
+    "build:electron:mac": "npm run build && electron-builder --mac",
+    "build:electron:linux": "npm run build && electron-builder --linux",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
@@ -30,6 +36,9 @@
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
     "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0",
+    "electron": "^39.1.1",
+    "electron-builder": "^26.0.12",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
@@ -50,6 +59,51 @@
     "business-automation"
   ],
   "author": "Taktak Team",
-  "license": "MIT"
+  "license": "MIT",
+  "build": {
+    "appId": "com.taktak.app",
+    "productName": "Taktak",
+    "copyright": "Copyright © 2024 Taktak",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "electron/**/*",
+      "apps/client/dist/**/*",
+      "apps/server/dist/**/*",
+      "public/**/*",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "apps/server/dist",
+        "to": "server",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": ["nsis"],
+      "icon": "public/logo.png",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "icon": "public/logo.png",
+      "category": "public.app-category.productivity",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "public/logo.png",
+      "category": "Office",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Taktak"
+    }
+  }
 }
-

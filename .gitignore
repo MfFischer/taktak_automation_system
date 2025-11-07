@@ -70,3 +70,12 @@ credentials/
 # Build artifacts
 *.tsbuildinfo
 
+# Electron build artifacts
+dist-electron/
+*.exe
+*.dmg
+*.AppImage
+*.deb
+*.rpm
+*.snap
+
