@@ -101,6 +101,12 @@ export default function Home() {
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-300 hover:text-white transition-colors duration-300">Features</a>
               <button
+                onClick={() => navigate('/desktop')}
+                className="text-gray-300 hover:text-white transition-colors duration-300"
+              >
+                Desktop App
+              </button>
+              <button
                 onClick={() => navigate('/pricing')}
                 className="text-gray-300 hover:text-white transition-colors duration-300"
               >
