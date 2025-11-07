@@ -192,6 +192,55 @@ export const api = {
         body: JSON.stringify({ customName, customDescription }),
       }),
   },
+
+  // License API
+  license: {
+    validate: (licenseKey: string) =>
+      apiRequest('/api/license/validate', {
+        method: 'POST',
+        body: JSON.stringify({ licenseKey }),
+        requiresAuth: false,
+      }),
+
+    activate: (licenseKey: string, deviceId?: string) =>
+      apiRequest('/api/license/activate', {
+        method: 'POST',
+        body: JSON.stringify({ licenseKey, deviceId }),
+      }),
+
+    create: (data: {
+      tier: string;
+      email: string;
+      expiresInDays?: number;
+      metadata?: any;
+    }) =>
+      apiRequest('/api/license/create', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        requiresAuth: false,
+      }),
+
+    getMyLicenses: () => apiRequest('/api/license/my-licenses'),
+
+    deactivate: (licenseKey: string) =>
+      apiRequest('/api/license/deactivate', {
+        method: 'POST',
+        body: JSON.stringify({ licenseKey }),
+        requiresAuth: false,
+      }),
+
+    generateDeviceId: (machineInfo: {
+      platform: string;
+      arch: string;
+      hostname?: string;
+      macAddress?: string;
+    }) =>
+      apiRequest('/api/license/device-id', {
+        method: 'POST',
+        body: JSON.stringify(machineInfo),
+        requiresAuth: false,
+      }),
+  },
 };
 
 export default api;

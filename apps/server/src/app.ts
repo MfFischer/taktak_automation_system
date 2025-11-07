@@ -24,6 +24,7 @@ import executionRoutes from './routes/executions';
 import settingsRoutes from './routes/settings';
 import aiRoutes from './routes/ai';
 import templateRoutes from './routes/templates';
+import licenseRoutes from './routes/license';
 
 /**
  * Creates and configures Express application
@@ -81,6 +82,7 @@ export function createApp(): Application {
   app.use('/api/settings', settingsRoutes);
   app.use('/api/ai', aiRoutes);
   app.use('/api/templates', templateRoutes);
+  app.use('/api/license', licenseRoutes);
 
   // Root endpoint
   app.get('/', (_req, res) => {
