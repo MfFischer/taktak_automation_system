@@ -8,6 +8,7 @@ import Joi from 'joi';
 import { asyncHandler } from '../middleware/errorHandler';
 import { validateBody, validateQuery } from '../middleware/validation';
 import { authenticateToken } from '../middleware/auth';
+import { WorkflowService } from '../services/workflowService';
 import {
   getAllTemplates,
   getTemplatesByCategory,
@@ -18,6 +19,7 @@ import {
 import { TemplateCategory, TemplateDifficulty } from '@taktak/types';
 
 const router = Router();
+const workflowService = new WorkflowService();
 
 /**
  * GET /api/templates
@@ -147,21 +149,21 @@ router.post(
     }
 
     // Create a new workflow from the template
-    const newWorkflow = {
-      ...template.workflow,
+    const workflowData = {
       name: customName || template.name,
       description: customDescription || template.description,
       userId,
-      status: 'draft',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      status: 'draft' as const,
+      nodes: template.workflow.nodes,
+      edges: template.workflow.edges,
     };
 
-    // TODO: Save to database
-    // For now, just return the workflow structure
+    // Save to database
+    const savedWorkflow = await workflowService.createWorkflow(workflowData);
+
     return res.json({
       success: true,
-      data: newWorkflow,
+      data: savedWorkflow,
       message: 'Template imported successfully. You can now customize and activate it.',
     });
   })

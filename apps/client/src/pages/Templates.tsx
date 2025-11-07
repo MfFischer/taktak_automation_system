@@ -72,7 +72,7 @@ export default function Templates() {
     try {
       await api.templates.import(template.id);
       alert(`Template "${template.name}" imported successfully!`);
-      navigate('/workflows');
+      navigate('/app/workflows');
     } catch (error) {
       console.error('Failed to import template:', error);
       alert('Failed to import template. Please try again.');
