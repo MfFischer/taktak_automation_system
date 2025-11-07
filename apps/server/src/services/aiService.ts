@@ -5,7 +5,7 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-import { Workflow, NodeType, WorkflowStatus } from '@taktak/types';
+import { Workflow, NodeType } from '@taktak/types';
 import { config } from '../config/environment';
 import { logger } from '../utils/logger';
 import { ValidationError, ExternalServiceError } from '../utils/errors';

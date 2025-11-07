@@ -24,7 +24,7 @@ export class HttpRequestNodeHandler implements NodeHandler {
     node: WorkflowNode,
     context: { input: Record<string, unknown>; variables: Record<string, unknown> }
   ): Promise<unknown> {
-    const config = node.config as HttpRequestConfig;
+    const config = node.config as unknown as HttpRequestConfig;
 
     // Replace variables in URL
     const url = this.replaceVariables(config.url, context);

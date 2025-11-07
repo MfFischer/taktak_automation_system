@@ -102,7 +102,7 @@ router.get(
   '/',
   validateQuery(listWorkflowsSchema),
   asyncHandler(async (req: Request, res: Response) => {
-    const { status, tags, page, limit } = req.query as {
+    const { status, tags, page, limit } = req.query as unknown as {
       status?: WorkflowStatus;
       tags?: string;
       page: number;

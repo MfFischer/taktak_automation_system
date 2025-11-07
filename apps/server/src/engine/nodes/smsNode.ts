@@ -19,7 +19,7 @@ export class SMSNodeHandler implements NodeHandler {
     node: WorkflowNode,
     context: { input: Record<string, unknown>; variables: Record<string, unknown> }
   ): Promise<unknown> {
-    const nodeConfig = node.config as SMSNodeConfig;
+    const nodeConfig = node.config as unknown as SMSNodeConfig;
 
     // Get Twilio credentials
     const accountSid = config.services.twilio.accountSid;

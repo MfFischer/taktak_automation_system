@@ -32,13 +32,13 @@ export class SettingsService {
   /**
    * Updates sync settings
    */
-  async updateSyncSettings(syncConfig: Partial<SyncConfig>): Promise<AppSettings> {
+  async updateSyncSettings(syncConfig: Partial<SyncConfig> & { password?: string }): Promise<AppSettings> {
     const settings = await this.getSettings();
 
     // Encrypt password if provided
     if (syncConfig.password) {
       syncConfig.encryptedPassword = encrypt(syncConfig.password);
-      delete (syncConfig as { password?: string }).password;
+      delete syncConfig.password;
     }
 
     const updated: AppSettings = {
@@ -68,14 +68,14 @@ export class SettingsService {
   /**
    * Adds an API key
    */
-  async addApiKey(keyData: Omit<ApiKeyConfig, 'id' | 'encryptedKey' | 'createdAt'>): Promise<AppSettings> {
+  async addApiKey(keyData: Omit<ApiKeyConfig, 'id' | 'encryptedKey' | 'createdAt'> & { key: string }): Promise<AppSettings> {
     const settings = await this.getSettings();
 
     const apiKey: ApiKeyConfig = {
       id: `key:${Date.now()}:${Math.random().toString(36).substr(2, 9)}`,
       name: keyData.name,
       service: keyData.service,
-      encryptedKey: encrypt((keyData as { key: string }).key),
+      encryptedKey: encrypt(keyData.key),
       createdAt: new Date().toISOString(),
       expiresAt: keyData.expiresAt,
     };

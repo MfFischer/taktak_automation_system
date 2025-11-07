@@ -33,7 +33,7 @@ interface WorkflowCanvasProps {
 }
 
 export default function WorkflowCanvas({
-  workflowId,
+  workflowId: _workflowId,
   initialNodes = [],
   initialEdges = [],
   onSave,

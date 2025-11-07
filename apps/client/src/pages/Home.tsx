@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Zap, ArrowRight, CheckCircle, Sparkles, 
+import {
+  ArrowRight, Sparkles,
   Workflow, Bot, Cloud, Lock, Mail, LogIn,
   Loader2, Github, Twitter, Linkedin
 } from 'lucide-react';

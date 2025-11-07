@@ -19,7 +19,7 @@ export class AIGenerateNodeHandler implements NodeHandler {
     node: WorkflowNode,
     context: { input: Record<string, unknown>; variables: Record<string, unknown> }
   ): Promise<unknown> {
-    const nodeConfig = node.config as AIGenerateConfig;
+    const nodeConfig = node.config as unknown as AIGenerateConfig;
 
     // Get API key
     const apiKey = config.services.gemini.apiKey || (await this.settingsService.getApiKey('gemini'));

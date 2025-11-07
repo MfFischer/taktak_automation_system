@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Workflow, Play, Settings, Sparkles, Zap, LogOut } from 'lucide-react';
+import { Home, Workflow, Play, Settings, Sparkles, LogOut } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/app', icon: Home },

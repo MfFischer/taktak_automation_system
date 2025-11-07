@@ -27,7 +27,7 @@ declare global {
 /**
  * Middleware to verify JWT token
  */
-export function authenticateToken(req: Request, res: Response, next: NextFunction): void {
+export function authenticateToken(req: Request, _res: Response, next: NextFunction): void {
   try {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
@@ -61,7 +61,7 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
 /**
  * Optional authentication - doesn't fail if no token
  */
-export function optionalAuth(req: Request, res: Response, next: NextFunction): void {
+export function optionalAuth(req: Request, _res: Response, next: NextFunction): void {
   try {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];

@@ -122,7 +122,7 @@ export function startSync(): PouchDB.Replication.Sync<{}> | null {
       retry: true,
       batch_size: 100,
     })
-    .on('change', (info) => {
+    .on('change', (info: any) => {
       logger.debug('Sync change', {
         direction: info.direction,
         docsWritten: info.change.docs_written,
@@ -134,7 +134,7 @@ export function startSync(): PouchDB.Replication.Sync<{}> | null {
     .on('active', () => {
       logger.debug('Sync active (replicating)');
     })
-    .on('error', (error) => {
+    .on('error', (error: any) => {
       logger.error('Sync error', { error: error.message });
     });
 

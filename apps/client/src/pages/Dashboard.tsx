@@ -53,7 +53,7 @@ export default function Dashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => (
+        {stats.map((stat) => (
           <div
             key={stat.name}
             className="card-interactive animate-fade-in-up"
@@ -115,7 +115,7 @@ export default function Dashboard() {
               icon: '☁️',
               action: () => navigate('/app/settings')
             }
-          ].map((item, index) => (
+          ].map((item) => (
             <button
               key={item.step}
               onClick={item.action}

@@ -16,7 +16,7 @@ export class DatabaseQueryNodeHandler implements NodeHandler {
     node: WorkflowNode,
     _context: { input: Record<string, unknown>; variables: Record<string, unknown> }
   ): Promise<unknown> {
-    const config = node.config as DatabaseQueryConfig;
+    const config = node.config as unknown as DatabaseQueryConfig;
 
     logger.info('Querying database', {
       nodeId: node.id,
@@ -32,10 +32,10 @@ export class DatabaseQueryNodeHandler implements NodeHandler {
 
       const result = await this.db.find({
         selector,
-        sort: config.sort ? [config.sort] : undefined,
+        sort: config.sort ? [config.sort as any] : undefined,
         limit: config.limit,
         skip: config.skip,
-      });
+      }) as any;
 
       logger.info('Database query completed', {
         nodeId: node.id,

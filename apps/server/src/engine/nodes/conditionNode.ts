@@ -13,7 +13,7 @@ export class ConditionNodeHandler implements NodeHandler {
     node: WorkflowNode,
     context: { input: Record<string, unknown>; variables: Record<string, unknown> }
   ): Promise<unknown> {
-    const config = node.config as ConditionNodeConfig;
+    const config = node.config as unknown as ConditionNodeConfig;
 
     logger.info('Evaluating conditions', {
       nodeId: node.id,

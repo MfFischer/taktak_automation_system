@@ -23,8 +23,8 @@ export class WorkflowService {
 
     const workflow: Workflow = {
       _id: `workflow:${Date.now()}:${Math.random().toString(36).substr(2, 9)}`,
-      type: 'workflow',
       ...data,
+      type: 'workflow',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -169,7 +169,7 @@ export class WorkflowService {
     const workflow = await this.getWorkflowById(id);
 
     try {
-      await this.db.remove(workflow);
+      await this.db.remove(workflow as any);
       logger.info('Workflow deleted', { workflowId: id });
     } catch (error) {
       logger.error('Failed to delete workflow', {

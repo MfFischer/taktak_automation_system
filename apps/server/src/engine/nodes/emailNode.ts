@@ -19,7 +19,7 @@ export class EmailNodeHandler implements NodeHandler {
     node: WorkflowNode,
     context: { input: Record<string, unknown>; variables: Record<string, unknown> }
   ): Promise<unknown> {
-    const nodeConfig = node.config as EmailNodeConfig;
+    const nodeConfig = node.config as unknown as EmailNodeConfig;
 
     // Get SMTP credentials
     const smtpPassword = config.services.smtp.password || (await this.settingsService.getApiKey('smtp'));

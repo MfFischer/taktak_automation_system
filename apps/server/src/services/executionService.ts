@@ -168,7 +168,7 @@ export class ExecutionService {
     const execution = await this.getExecutionById(id);
 
     try {
-      await this.db.remove(execution);
+      await this.db.remove(execution as any);
       logger.info('Execution deleted', { executionId: id });
     } catch (error) {
       logger.error('Failed to delete execution', {

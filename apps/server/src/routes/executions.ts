@@ -35,7 +35,7 @@ router.get(
   '/',
   validateQuery(listExecutionsSchema),
   asyncHandler(async (req: Request, res: Response) => {
-    const { workflowId, status, page, limit } = req.query as {
+    const { workflowId, status, page, limit } = req.query as unknown as {
       workflowId?: string;
       status?: ExecutionStatus;
       page: number;

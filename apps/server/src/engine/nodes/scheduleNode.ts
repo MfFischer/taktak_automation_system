@@ -13,7 +13,7 @@ export class ScheduleNodeHandler implements NodeHandler {
     node: WorkflowNode,
     _context: { input: Record<string, unknown>; variables: Record<string, unknown> }
   ): Promise<unknown> {
-    const config = node.config as ScheduleNodeConfig;
+    const config = node.config as unknown as ScheduleNodeConfig;
 
     logger.info('Schedule node triggered', {
       nodeId: node.id,
