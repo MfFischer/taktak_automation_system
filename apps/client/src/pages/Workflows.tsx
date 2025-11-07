@@ -11,7 +11,7 @@ export default function Workflows() {
             Manage your automation workflows
           </p>
         </div>
-        <Link to="/workflows/new" className="btn btn-primary flex items-center">
+        <Link to="/app/workflows/new" className="btn btn-primary flex items-center">
           <Plus className="w-5 h-5 mr-2" />
           New Workflow
         </Link>
@@ -28,7 +28,7 @@ export default function Workflows() {
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           Get started by creating your first workflow
         </p>
-        <Link to="/workflows/new" className="btn btn-primary inline-flex items-center">
+        <Link to="/app/workflows/new" className="btn btn-primary inline-flex items-center">
           <Plus className="w-5 h-5 mr-2" />
           Create Workflow
         </Link>

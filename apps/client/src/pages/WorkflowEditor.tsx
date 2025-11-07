@@ -56,7 +56,7 @@ export default function WorkflowEditor() {
           <div className="flex items-center gap-4">
             <button
               type="button"
-              onClick={() => navigate('/workflows')}
+              onClick={() => navigate('/app/workflows')}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               aria-label="Back to workflows"
             >
