@@ -358,5 +358,172 @@ export const cooperativeTemplates: WorkflowTemplate[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
+
+  // 5. Loan Application Notification
+  {
+    id: 'coop-loan-application',
+    name: 'Loan Application Notification System',
+    description: 'Notify board members when new loan applications are submitted',
+    category: TemplateCategory.COOPERATIVE,
+    difficulty: TemplateDifficulty.INTERMEDIATE,
+    tags: ['loans', 'applications', 'notifications', 'email', 'governance'],
+    icon: '💳',
+    estimatedSetupTime: 20,
+    requiredIntegrations: ['smtp', 'database'],
+    useCases: [
+      'Streamline loan approval process',
+      'Notify decision makers',
+      'Track applications',
+      'Improve transparency',
+    ],
+    benefits: [
+      'Faster loan processing',
+      'Better governance',
+      'Transparent process',
+      'Reduces delays',
+    ],
+    workflow: {
+      type: 'workflow',
+      name: 'Loan Application Notification System',
+      description: 'Alert board when new loan application is submitted',
+      status: WorkflowStatus.DRAFT,
+      trigger: {
+        id: 'trigger',
+        name: 'Database Watch',
+        type: NodeType.DATABASE_WATCH,
+        config: {
+          table: 'loan_applications',
+          event: 'insert',
+        },
+      },
+      nodes: [
+        {
+          id: 'node-1',
+          type: NodeType.DATABASE_QUERY,
+          name: 'Get Application Details',
+          config: {
+            query: 'SELECT la.*, m.name, m.email, m.phone FROM loan_applications la JOIN members m ON la.member_id = m.id WHERE la.id = {{trigger.id}}',
+            database: 'coop_db',
+          },
+        },
+        {
+          id: 'node-2',
+          type: NodeType.DATABASE_QUERY,
+          name: 'Get Board Members',
+          config: {
+            query: 'SELECT * FROM members WHERE role = "board" AND active = 1',
+            database: 'coop_db',
+          },
+        },
+        {
+          id: 'node-3',
+          type: NodeType.LOOP,
+          name: 'For Each Board Member',
+          config: {
+            items: '{{node-2.output}}',
+          },
+        },
+        {
+          id: 'node-4',
+          type: NodeType.SEND_EMAIL,
+          name: 'Send Notification Email',
+          config: {
+            to: '{{item.email}}',
+            subject: 'New Loan Application - {{node-1.output.name}}',
+            body: 'Dear {{item.name}},\n\nA new loan application has been submitted and requires board review.\n\nApplicant: {{node-1.output.name}}\nLoan Amount: ${{node-1.output.amount}}\nPurpose: {{node-1.output.purpose}}\nSubmitted: {{node-1.output.created_at}}\n\nApplication Details:\n- Member Since: {{node-1.output.member_since}}\n- Current Contributions: ${{node-1.output.total_contributions}}\n- Previous Loans: {{node-1.output.previous_loans}}\n\nPlease review the application in the member portal: {{portal_url}}/loans/{{trigger.id}}\n\nThe board will vote on this application at the next meeting.\n\nBest regards,\n{{coop_name}} System',
+          },
+        },
+      ],
+      connections: [
+        { from: 'node-1', to: 'node-2' },
+        { from: 'node-2', to: 'node-3' },
+        { from: 'node-3', to: 'node-4' },
+      ],
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+
+  // 6. Harvest Collection Reminder
+  {
+    id: 'coop-harvest-reminder',
+    name: 'Harvest Collection Reminder',
+    description: 'Remind farmers to deliver their harvest to the cooperative collection point',
+    category: TemplateCategory.COOPERATIVE,
+    difficulty: TemplateDifficulty.BEGINNER,
+    tags: ['agriculture', 'harvest', 'collection', 'reminders', 'sms'],
+    icon: '🌾',
+    estimatedSetupTime: 15,
+    requiredIntegrations: ['twilio', 'database'],
+    useCases: [
+      'Agricultural cooperatives',
+      'Harvest coordination',
+      'Collection scheduling',
+      'Supply chain management',
+    ],
+    benefits: [
+      'Improves harvest collection',
+      'Reduces spoilage',
+      'Better planning',
+      'Increases farmer participation',
+    ],
+    workflow: {
+      type: 'workflow',
+      name: 'Harvest Collection Reminder',
+      description: 'Send reminders 1 day before collection day',
+      status: WorkflowStatus.DRAFT,
+      trigger: {
+        id: 'trigger',
+        name: 'Daily Schedule',
+        type: NodeType.SCHEDULE,
+        config: {
+          cron: '0 17 * * *', // Run daily at 5 PM
+        },
+      },
+      nodes: [
+        {
+          id: 'node-1',
+          type: NodeType.DATABASE_QUERY,
+          name: 'Get Tomorrow\'s Collections',
+          config: {
+            query: 'SELECT c.*, m.name, m.phone FROM collections c JOIN members m ON c.farmer_id = m.id WHERE c.collection_date = DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND c.status = "scheduled"',
+            database: 'coop_db',
+          },
+        },
+        {
+          id: 'node-2',
+          type: NodeType.CONDITION,
+          name: 'Check if Collections Exist',
+          config: {
+            condition: 'input.length > 0',
+          },
+        },
+        {
+          id: 'node-3',
+          type: NodeType.LOOP,
+          name: 'For Each Collection',
+          config: {
+            items: '{{node-1.output}}',
+          },
+        },
+        {
+          id: 'node-4',
+          type: NodeType.SEND_SMS,
+          name: 'Send Collection Reminder',
+          config: {
+            to: '{{item.phone}}',
+            message: 'Hi {{item.name}}, reminder: Harvest collection tomorrow at {{item.collection_time}} at {{collection_point}}. Expected: {{item.estimated_quantity}}kg {{item.crop_type}}. Bring your member ID. - {{coop_name}}',
+          },
+        },
+      ],
+      connections: [
+        { from: 'node-1', to: 'node-2' },
+        { from: 'node-2', to: 'node-3', condition: 'true' },
+        { from: 'node-3', to: 'node-4' },
+      ],
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
 ];
 

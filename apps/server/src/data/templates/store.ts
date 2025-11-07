@@ -359,5 +359,186 @@ export const storeTemplates: WorkflowTemplate[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
+
+  // 5. Birthday Discount Campaign
+  {
+    id: 'store-birthday-discount',
+    name: 'Birthday Discount Campaign',
+    description: 'Send personalized birthday discounts to customers automatically',
+    category: TemplateCategory.STORE,
+    difficulty: TemplateDifficulty.BEGINNER,
+    tags: ['marketing', 'discounts', 'birthdays', 'customer-loyalty', 'sms'],
+    icon: '🎂',
+    estimatedSetupTime: 15,
+    requiredIntegrations: ['twilio', 'database'],
+    useCases: [
+      'Increase customer loyalty',
+      'Drive repeat purchases',
+      'Personalized marketing',
+      'Build customer relationships',
+    ],
+    benefits: [
+      'Increases customer lifetime value',
+      'Drives birthday month sales',
+      'Improves brand perception',
+      'Easy to automate',
+    ],
+    workflow: {
+      type: 'workflow',
+      name: 'Birthday Discount Campaign',
+      description: 'Send birthday discount SMS to customers',
+      status: WorkflowStatus.DRAFT,
+      trigger: {
+        id: 'trigger',
+        name: 'Daily Schedule',
+        type: NodeType.SCHEDULE,
+        config: {
+          cron: '0 9 * * *', // Run daily at 9 AM
+        },
+      },
+      nodes: [
+        {
+          id: 'node-1',
+          type: NodeType.DATABASE_QUERY,
+          name: 'Get Today\'s Birthdays',
+          config: {
+            query: 'SELECT * FROM customers WHERE MONTH(birthday) = MONTH(CURDATE()) AND DAY(birthday) = DAY(CURDATE()) AND active = 1',
+            database: 'store_db',
+          },
+        },
+        {
+          id: 'node-2',
+          type: NodeType.LOOP,
+          name: 'For Each Birthday Customer',
+          config: {
+            items: '{{node-1.output}}',
+          },
+        },
+        {
+          id: 'node-3',
+          type: NodeType.SEND_SMS,
+          name: 'Send Birthday Discount',
+          config: {
+            to: '{{item.phone}}',
+            message: '🎂 Happy Birthday {{item.name}}! Enjoy 20% OFF your next purchase with code BDAY20. Valid for 7 days. Shop now at {{store_url}}. - {{store_name}}',
+          },
+        },
+        {
+          id: 'node-4',
+          type: NodeType.DATABASE_INSERT,
+          name: 'Log Campaign',
+          config: {
+            table: 'marketing_campaigns',
+            data: {
+              customer_id: '{{item.id}}',
+              campaign_type: 'birthday',
+              discount_code: 'BDAY20',
+              sent_date: '{{now}}',
+            },
+            database: 'store_db',
+          },
+        },
+      ],
+      connections: [
+        { from: 'node-1', to: 'node-2' },
+        { from: 'node-2', to: 'node-3' },
+        { from: 'node-3', to: 'node-4' },
+      ],
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+
+  // 6. Flash Sale Announcement
+  {
+    id: 'store-flash-sale',
+    name: 'Flash Sale Announcement System',
+    description: 'Instantly notify all customers about flash sales and limited-time offers',
+    category: TemplateCategory.STORE,
+    difficulty: TemplateDifficulty.INTERMEDIATE,
+    tags: ['marketing', 'sales', 'promotions', 'sms', 'bulk-messaging'],
+    icon: '⚡',
+    estimatedSetupTime: 20,
+    requiredIntegrations: ['twilio', 'database'],
+    useCases: [
+      'Announce flash sales',
+      'Clear excess inventory',
+      'Drive immediate traffic',
+      'Boost revenue quickly',
+    ],
+    benefits: [
+      'Instant customer reach',
+      'Increases foot traffic',
+      'Clears slow-moving stock',
+      'Creates urgency',
+    ],
+    workflow: {
+      type: 'workflow',
+      name: 'Flash Sale Announcement System',
+      description: 'Send flash sale alerts to all active customers',
+      status: WorkflowStatus.DRAFT,
+      trigger: {
+        id: 'trigger',
+        name: 'Webhook Trigger',
+        type: NodeType.WEBHOOK,
+        config: {
+          path: '/flash-sale/announce',
+          method: 'POST',
+        },
+      },
+      nodes: [
+        {
+          id: 'node-1',
+          type: NodeType.DATABASE_QUERY,
+          name: 'Get Active Customers',
+          config: {
+            query: 'SELECT * FROM customers WHERE active = 1 AND sms_opt_in = 1',
+            database: 'store_db',
+          },
+        },
+        {
+          id: 'node-2',
+          type: NodeType.CONDITION,
+          name: 'Check Customer Count',
+          config: {
+            condition: 'input.length > 0',
+          },
+        },
+        {
+          id: 'node-3',
+          type: NodeType.LOOP,
+          name: 'For Each Customer',
+          config: {
+            items: '{{node-1.output}}',
+          },
+        },
+        {
+          id: 'node-4',
+          type: NodeType.SEND_SMS,
+          name: 'Send Flash Sale Alert',
+          config: {
+            to: '{{item.phone}}',
+            message: '⚡ FLASH SALE! {{trigger.discount}}% OFF {{trigger.product_category}} for the next {{trigger.duration}} hours! Shop now: {{store_url}} - {{store_name}}',
+          },
+        },
+        {
+          id: 'node-5',
+          type: NodeType.DELAY,
+          name: 'Rate Limit',
+          config: {
+            duration: 1, // 1 second delay between messages
+          },
+        },
+      ],
+      connections: [
+        { from: 'node-1', to: 'node-2' },
+        { from: 'node-2', to: 'node-3', condition: 'true' },
+        { from: 'node-3', to: 'node-4' },
+        { from: 'node-4', to: 'node-5' },
+      ],
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
 ];
 

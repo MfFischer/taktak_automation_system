@@ -328,5 +328,161 @@ export const clinicTemplates: WorkflowTemplate[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
+
+  // 5. Vaccination Reminder
+  {
+    id: 'clinic-vaccination-reminder',
+    name: 'Vaccination Reminder System',
+    description: 'Send automated reminders to parents for children\'s vaccination schedules',
+    category: TemplateCategory.CLINIC,
+    difficulty: TemplateDifficulty.BEGINNER,
+    tags: ['vaccination', 'immunization', 'pediatrics', 'reminders', 'sms'],
+    icon: '💉',
+    estimatedSetupTime: 15,
+    requiredIntegrations: ['twilio', 'database'],
+    useCases: [
+      'Improve vaccination compliance',
+      'Reduce missed appointments',
+      'Public health tracking',
+      'Pediatric care automation',
+    ],
+    benefits: [
+      'Increases vaccination rates',
+      'Prevents disease outbreaks',
+      'Reduces manual tracking',
+      'Improves child health outcomes',
+    ],
+    workflow: {
+      type: 'workflow',
+      name: 'Vaccination Reminder System',
+      description: 'Send reminders 1 week before vaccination due date',
+      status: WorkflowStatus.DRAFT,
+      trigger: {
+        id: 'trigger',
+        name: 'Daily Schedule',
+        type: NodeType.SCHEDULE,
+        config: {
+          cron: '0 9 * * *', // Run daily at 9 AM
+        },
+      },
+      nodes: [
+        {
+          id: 'node-1',
+          type: NodeType.DATABASE_QUERY,
+          name: 'Get Upcoming Vaccinations',
+          config: {
+            query: 'SELECT v.*, p.name as patient_name, p.parent_phone FROM vaccinations v JOIN patients p ON v.patient_id = p.id WHERE v.due_date = DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND v.status = "pending"',
+            database: 'clinic_db',
+          },
+        },
+        {
+          id: 'node-2',
+          type: NodeType.LOOP,
+          name: 'For Each Vaccination',
+          config: {
+            items: '{{node-1.output}}',
+          },
+        },
+        {
+          id: 'node-3',
+          type: NodeType.SEND_SMS,
+          name: 'Send Vaccination Reminder',
+          config: {
+            to: '{{item.parent_phone}}',
+            message: 'Hi! Reminder: {{item.patient_name}} is due for {{item.vaccine_name}} vaccination on {{item.due_date}}. Please schedule an appointment. Reply BOOK to schedule. - {{clinic_name}}',
+          },
+        },
+      ],
+      connections: [
+        { from: 'node-1', to: 'node-2' },
+        { from: 'node-2', to: 'node-3' },
+      ],
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+
+  // 6. Emergency Contact Alert
+  {
+    id: 'clinic-emergency-alert',
+    name: 'Emergency Contact Alert System',
+    description: 'Instantly notify emergency contacts when patient is admitted',
+    category: TemplateCategory.CLINIC,
+    difficulty: TemplateDifficulty.INTERMEDIATE,
+    tags: ['emergency', 'alerts', 'critical-care', 'sms', 'notifications'],
+    icon: '🚨',
+    estimatedSetupTime: 20,
+    requiredIntegrations: ['twilio', 'database'],
+    useCases: [
+      'Emergency patient admissions',
+      'Critical condition alerts',
+      'Family notifications',
+      'Compliance with protocols',
+    ],
+    benefits: [
+      'Faster family notification',
+      'Reduces staff workload',
+      'Improves patient care',
+      'Legal compliance',
+    ],
+    workflow: {
+      type: 'workflow',
+      name: 'Emergency Contact Alert System',
+      description: 'Alert emergency contacts when patient is admitted',
+      status: WorkflowStatus.DRAFT,
+      trigger: {
+        id: 'trigger',
+        name: 'Database Watch',
+        type: NodeType.DATABASE_WATCH,
+        config: {
+          table: 'admissions',
+          event: 'insert',
+        },
+      },
+      nodes: [
+        {
+          id: 'node-1',
+          type: NodeType.CONDITION,
+          name: 'Check if Emergency',
+          config: {
+            condition: 'trigger.admission_type === "emergency"',
+          },
+        },
+        {
+          id: 'node-2',
+          type: NodeType.DATABASE_QUERY,
+          name: 'Get Patient & Emergency Contacts',
+          config: {
+            query: 'SELECT p.*, ec.name as contact_name, ec.phone as contact_phone, ec.relationship FROM patients p JOIN emergency_contacts ec ON p.id = ec.patient_id WHERE p.id = {{trigger.patient_id}}',
+            database: 'clinic_db',
+          },
+        },
+        {
+          id: 'node-3',
+          type: NodeType.LOOP,
+          name: 'For Each Emergency Contact',
+          config: {
+            items: '{{node-2.output}}',
+          },
+        },
+        {
+          id: 'node-4',
+          type: NodeType.SEND_SMS,
+          name: 'Send Emergency Alert',
+          config: {
+            to: '{{item.contact_phone}}',
+            message: 'URGENT: {{item.name}} has been admitted to {{clinic_name}} for emergency care. Please contact us at {{clinic_phone}} immediately. - {{clinic_name}} Emergency Dept',
+          },
+        },
+      ],
+      connections: [
+        { from: 'node-1', to: 'node-2', condition: 'true' },
+        { from: 'node-2', to: 'node-3' },
+        { from: 'node-3', to: 'node-4' },
+      ],
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
 ];
 
