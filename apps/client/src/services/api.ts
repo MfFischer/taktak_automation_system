@@ -63,7 +63,7 @@ export const api = {
       }),
 
     signup: (email: string, password: string, name: string) =>
-      apiRequest('/api/auth/signup', {
+      apiRequest('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify({ email, password, name }),
         requiresAuth: false,

@@ -12,6 +12,9 @@ import AIAssistant from './pages/AIAssistant';
 import Templates from './pages/Templates';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import Cookies from './pages/Cookies';
 
 // Simple auth check
 const isAuthenticated = () => {
@@ -36,6 +39,9 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/cookies" element={<Cookies />} />
 
         {/* Protected routes */}
         <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>

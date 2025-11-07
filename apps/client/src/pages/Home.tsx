@@ -286,10 +286,13 @@ export default function Home() {
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-3">{feature.title}</h3>
                 <p className="text-gray-400 leading-relaxed">{feature.description}</p>
-                <div className="mt-6 flex items-center text-taktak-400 font-medium group cursor-pointer">
-                  <span>Learn more</span>
+                <button
+                  onClick={() => navigate('/signup')}
+                  className="mt-6 flex items-center text-taktak-400 font-medium group hover:text-taktak-300 transition-colors"
+                >
+                  <span>Get started</span>
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </div>
+                </button>
               </div>
             ))}
           </div>
@@ -299,7 +302,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="relative z-10 border-t border-dark-border bg-dark-surface/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <img src="/logo.png" alt="Taktak" className="w-8 h-8 object-contain" />
@@ -308,51 +311,42 @@ export default function Home() {
               <p className="text-gray-400 text-sm">
                 Shake off the manual work with AI-powered automation.
               </p>
+              <div className="flex items-center space-x-4 pt-4">
+                <a href="https://github.com/MfFischer/taktak_automation_system" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                  <Github className="w-5 h-5" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <Twitter className="w-5 h-5" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <Linkedin className="w-5 h-5" />
+                </a>
+              </div>
             </div>
 
             <div>
               <h4 className="font-semibold text-white mb-4">Product</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-white mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
+                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
+                <li><button onClick={() => navigate('/signup')} className="hover:text-white transition-colors">Get Started</button></li>
+                <li><a href="https://github.com/MfFischer/taktak_automation_system#readme" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Documentation</a></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-semibold text-white mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Cookie Policy</a></li>
+                <li><button onClick={() => navigate('/privacy')} className="hover:text-white transition-colors">Privacy Policy</button></li>
+                <li><button onClick={() => navigate('/terms')} className="hover:text-white transition-colors">Terms of Service</button></li>
+                <li><button onClick={() => navigate('/cookies')} className="hover:text-white transition-colors">Cookie Policy</button></li>
               </ul>
             </div>
           </div>
 
           <div className="pt-8 border-t border-dark-border flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-sm text-gray-400">
-              © 2024 Taktak. All rights reserved.
+              © 2024 Taktak. Open source under MIT License.
             </p>
-            <div className="flex items-center space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Github className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </a>
-            </div>
           </div>
         </div>
       </footer>
