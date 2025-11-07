@@ -100,9 +100,14 @@ export default function Home() {
             {/* Nav Links */}
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-300 hover:text-white transition-colors duration-300">Features</a>
-              <a href="#pricing" className="text-gray-300 hover:text-white transition-colors duration-300">Pricing</a>
+              <button
+                onClick={() => navigate('/pricing')}
+                className="text-gray-300 hover:text-white transition-colors duration-300"
+              >
+                Pricing
+              </button>
               <a href="#docs" className="text-gray-300 hover:text-white transition-colors duration-300">Docs</a>
-              <button 
+              <button
                 onClick={() => navigate('/signup')}
                 className="btn btn-ghost"
               >

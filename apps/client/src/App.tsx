@@ -10,6 +10,7 @@ import Executions from './pages/Executions';
 import Settings from './pages/Settings';
 import AIAssistant from './pages/AIAssistant';
 import Templates from './pages/Templates';
+import Pricing from './pages/Pricing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Privacy from './pages/Privacy';
@@ -37,6 +38,7 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Home />} />
+        <Route path="/pricing" element={<Pricing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/privacy" element={<Privacy />} />
