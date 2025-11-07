@@ -280,16 +280,37 @@ export interface User {
 // Template Types
 // ============================================
 
+export enum TemplateCategory {
+  CLINIC = 'clinic',
+  STORE = 'store',
+  COOPERATIVE = 'cooperative',
+  GROCERY = 'grocery',
+  PRINTSHOP = 'printshop',
+  PHARMACY = 'pharmacy',
+  GENERAL = 'general',
+}
+
+export enum TemplateDifficulty {
+  BEGINNER = 'beginner',
+  INTERMEDIATE = 'intermediate',
+  ADVANCED = 'advanced',
+}
+
 export interface WorkflowTemplate {
   id: string;
   name: string;
   description: string;
-  category: 'grocery' | 'clinic' | 'printshop' | 'pharmacy' | 'general';
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  workflow: Omit<Workflow, '_id' | '_rev' | 'createdAt' | 'updatedAt'>;
-  requiredIntegrations: string[];
-  estimatedSetupTime: number; // minutes
+  category: TemplateCategory;
+  difficulty: TemplateDifficulty;
   tags: string[];
+  icon?: string;
+  estimatedSetupTime: number; // in minutes
+  requiredIntegrations: string[]; // e.g., ['twilio', 'smtp']
+  workflow: Omit<Workflow, '_id' | '_rev' | 'createdAt' | 'updatedAt'>;
+  useCases: string[];
+  benefits: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ============================================
@@ -308,4 +329,3 @@ export interface AuditLog {
   details?: Record<string, unknown>;
   ipAddress?: string;
 }
-

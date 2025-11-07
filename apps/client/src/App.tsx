@@ -9,6 +9,7 @@ import WorkflowEditor from './pages/WorkflowEditor';
 import Executions from './pages/Executions';
 import Settings from './pages/Settings';
 import AIAssistant from './pages/AIAssistant';
+import Templates from './pages/Templates';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 
@@ -43,6 +44,7 @@ function App() {
           <Route path="workflows/new" element={<WorkflowEditor />} />
           <Route path="workflows/:id" element={<WorkflowEditor />} />
           <Route path="executions" element={<Executions />} />
+          <Route path="templates" element={<Templates />} />
           <Route path="ai-assistant" element={<AIAssistant />} />
           <Route path="settings" element={<Settings />} />
         </Route>

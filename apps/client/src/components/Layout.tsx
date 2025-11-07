@@ -1,9 +1,10 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Workflow, Play, Settings, Sparkles, LogOut } from 'lucide-react';
+import { Home, Workflow, Play, Settings, Sparkles, LogOut, BookTemplate } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/app', icon: Home },
   { name: 'Workflows', href: '/app/workflows', icon: Workflow },
+  { name: 'Templates', href: '/app/templates', icon: BookTemplate },
   { name: 'Executions', href: '/app/executions', icon: Play },
   { name: 'AI Assistant', href: '/app/ai-assistant', icon: Sparkles },
   { name: 'Settings', href: '/app/settings', icon: Settings },

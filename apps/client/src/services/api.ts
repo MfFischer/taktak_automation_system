@@ -163,7 +163,35 @@ export const api = {
   // Health
   health: () =>
     apiRequest('/api/health', { requiresAuth: false }),
+
+  // Templates
+  templates: {
+    getAll: (params?: {
+      category?: string;
+      difficulty?: string;
+      tags?: string;
+      search?: string;
+    }) => {
+      const queryParams = new URLSearchParams();
+      if (params?.category) queryParams.append('category', params.category);
+      if (params?.difficulty) queryParams.append('difficulty', params.difficulty);
+      if (params?.tags) queryParams.append('tags', params.tags);
+      if (params?.search) queryParams.append('search', params.search);
+
+      const query = queryParams.toString();
+      return apiRequest(`/api/templates${query ? `?${query}` : ''}`);
+    },
+
+    getCategories: () => apiRequest('/api/templates/categories'),
+
+    getById: (id: string) => apiRequest(`/api/templates/${id}`),
+
+    import: (id: string, customName?: string, customDescription?: string) =>
+      apiRequest(`/api/templates/${id}/import`, {
+        method: 'POST',
+        body: JSON.stringify({ customName, customDescription }),
+      }),
+  },
 };
 
 export default api;
-
