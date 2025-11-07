@@ -67,6 +67,12 @@
     "directories": {
       "output": "dist-electron"
     },
+    "publish": {
+      "provider": "github",
+      "owner": "MfFischer",
+      "repo": "taktak_automation_system",
+      "releaseType": "release"
+    },
     "files": [
       "electron/**/*",
       "apps/client/dist/**/*",
@@ -117,6 +123,7 @@
     }
   },
   "dependencies": {
-    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0"
+    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
+    "electron-updater": "^6.6.2"
   }
 }

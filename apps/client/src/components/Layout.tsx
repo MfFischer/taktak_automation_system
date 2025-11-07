@@ -1,5 +1,6 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Workflow, Play, Settings, Sparkles, LogOut, BookTemplate } from 'lucide-react';
+import UpdateNotification from './UpdateNotification';
 
 const navigation = [
   { name: 'Dashboard', href: '/app', icon: Home },
@@ -105,6 +106,9 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Update Notification */}
+      <UpdateNotification />
     </div>
   );
 }

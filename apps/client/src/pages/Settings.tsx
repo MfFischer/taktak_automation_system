@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import {
   User, Key, Cloud, Bell, Shield, Zap,
   Save, Eye, EyeOff, Copy, Check, Mail,
-  MessageSquare, Database, Lock, Sparkles, Brain
+  MessageSquare, Database, Lock, Sparkles, Brain, Download, Loader2
 } from 'lucide-react';
 import { api } from '../services/api';
+import toast from 'react-hot-toast';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -34,6 +35,7 @@ export default function Settings() {
   });
 
   const [aiMode, setAIMode] = useState<'cloud' | 'local' | 'auto'>('auto');
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
 
   // Load AI mode on mount
   useEffect(() => {
@@ -70,6 +72,30 @@ export default function Settings() {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCheckForUpdates = async () => {
+    if (typeof window !== 'undefined' && (window as any).electron) {
+      setIsCheckingUpdates(true);
+      try {
+        const electron = (window as any).electron;
+        const result = await electron.checkForUpdates();
+
+        if (result.status === 'dev-mode') {
+          toast.error('Updates are disabled in development mode');
+        } else if (result.status === 'success') {
+          toast.success('Checking for updates...');
+        } else if (result.status === 'error') {
+          toast.error(`Update check failed: ${result.error}`);
+        }
+      } catch (error) {
+        toast.error('Failed to check for updates');
+      } finally {
+        setIsCheckingUpdates(false);
+      }
+    } else {
+      toast.error('Update checking is only available in the desktop app');
+    }
   };
 
   const tabs = [
@@ -688,6 +714,32 @@ export default function Settings() {
                     </>
                   )}
                 </button>
+
+                {/* App Updates Section */}
+                <div className="pt-6 mt-6 border-t border-dark-border">
+                  <h3 className="text-lg font-semibold text-white mb-4">App Updates</h3>
+                  <p className="text-sm text-gray-400 mb-4">
+                    Check for updates to get the latest features and security improvements.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleCheckForUpdates}
+                    disabled={isCheckingUpdates}
+                    className="btn btn-ghost"
+                  >
+                    {isCheckingUpdates ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <span>Checking...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4 mr-2" />
+                        <span>Check for Updates</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           )}
