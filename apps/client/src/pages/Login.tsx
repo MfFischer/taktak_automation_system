@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Lock, Loader2, Zap, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+import { api } from '../services/api';
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,26 +16,14 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || 'Login failed');
-      }
+      const data = await api.auth.login(email, password) as any;
 
       // Store token
       localStorage.setItem('token', data.data.token);
       localStorage.setItem('user', JSON.stringify(data.data.user));
 
       toast.success('🎉 Welcome back!');
-      navigate('/');
+      navigate('/app');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Login failed');
     } finally {

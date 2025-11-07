@@ -55,9 +55,12 @@ export class AIService {
         nodeCount: workflow.nodes?.length || 0,
       });
 
+      // Calculate confidence score
+      const confidence = this.calculateConfidenceScore(workflow, prompt);
+
       return {
         workflow,
-        confidence: 0.85, // TODO: Implement confidence scoring
+        confidence,
         suggestions: this.generateSuggestions(workflow),
       };
     } catch (error) {
@@ -244,6 +247,97 @@ Return ONLY valid JSON, no explanations.`;
     }
 
     return suggestions;
+  }
+
+  /**
+   * Calculates confidence score for AI-generated workflow
+   * Score is based on completeness, validity, and complexity
+   * Returns a value between 0 and 1
+   */
+  private calculateConfidenceScore(workflow: Partial<Workflow>, prompt: string): number {
+    let score = 0;
+    let maxScore = 0;
+
+    // Check for required fields (30 points)
+    maxScore += 30;
+    if (workflow.name) score += 10;
+    if (workflow.description) score += 10;
+    if (workflow.trigger) score += 10;
+
+    // Check nodes (25 points)
+    maxScore += 25;
+    if (workflow.nodes && workflow.nodes.length > 0) {
+      score += 15;
+      // Bonus for reasonable node count (not too few, not too many)
+      if (workflow.nodes.length >= 2 && workflow.nodes.length <= 10) {
+        score += 10;
+      } else if (workflow.nodes.length > 10) {
+        score += 5; // Partial credit for complex workflows
+      }
+    }
+
+    // Check connections (20 points)
+    maxScore += 20;
+    if (workflow.connections && workflow.connections.length > 0) {
+      score += 10;
+      // Bonus if connections match node count reasonably
+      const expectedConnections = (workflow.nodes?.length || 0) - 1;
+      if (workflow.connections.length >= expectedConnections * 0.5) {
+        score += 10;
+      }
+    }
+
+    // Check node configurations (15 points)
+    maxScore += 15;
+    if (workflow.nodes) {
+      const configuredNodes = workflow.nodes.filter(
+        (node) => node.config && Object.keys(node.config).length > 0
+      );
+      const configRatio = configuredNodes.length / workflow.nodes.length;
+      score += Math.round(15 * configRatio);
+    }
+
+    // Check prompt relevance (10 points)
+    maxScore += 10;
+    if (workflow.name && prompt) {
+      // Simple heuristic: check if workflow name relates to prompt
+      const promptWords = prompt.toLowerCase().split(/\s+/);
+      const nameWords = workflow.name.toLowerCase().split(/\s+/);
+      const overlap = promptWords.filter((word) => nameWords.includes(word)).length;
+      if (overlap > 0) {
+        score += Math.min(10, overlap * 3);
+      }
+    }
+
+    // Normalize to 0-1 range
+    const normalizedScore = maxScore > 0 ? score / maxScore : 0;
+
+    // Apply penalties for issues
+    let penalty = 0;
+    if (workflow.nodes && workflow.nodes.some((node) => !node.type || !node.name)) {
+      penalty += 0.1; // Invalid nodes
+    }
+    if (workflow.connections) {
+      const nodeIds = new Set(workflow.nodes?.map((n) => n.id) || []);
+      const invalidConnections = workflow.connections.filter(
+        (conn) => !nodeIds.has(conn.from) || !nodeIds.has(conn.to)
+      );
+      if (invalidConnections.length > 0) {
+        penalty += 0.15; // Invalid connections
+      }
+    }
+
+    const finalScore = Math.max(0, Math.min(1, normalizedScore - penalty));
+
+    logger.debug('Calculated confidence score', {
+      score,
+      maxScore,
+      normalizedScore,
+      penalty,
+      finalScore,
+    });
+
+    return Math.round(finalScore * 100) / 100; // Round to 2 decimal places
   }
 }
 

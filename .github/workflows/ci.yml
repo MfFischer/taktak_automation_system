@@ -28,16 +28,14 @@ jobs:
         run: npm ci
 
       - name: Lint
-        run: npm run lint || echo "Linting has warnings, continuing..."
-        continue-on-error: true
+        run: npm run lint
 
       - name: Type check
-        run: npm run type-check || echo "Type checking has warnings, continuing..."
-        continue-on-error: true
+        run: npm run type-check
 
       - name: Run tests
-        run: npm test || echo "Some tests failed, continuing..."
-        continue-on-error: true
+        run: npm test
+        continue-on-error: true  # Allow test failures for now, but log them
 
       - name: Build
         run: npm run build

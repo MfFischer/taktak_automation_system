@@ -1,0 +1,161 @@
+/**
+ * Centralized API client
+ * Handles all HTTP requests to the backend
+ */
+
+import { config } from '../config/environment';
+
+const API_BASE_URL = config.apiUrl;
+
+interface RequestOptions extends RequestInit {
+  requiresAuth?: boolean;
+}
+
+/**
+ * Makes an authenticated API request
+ */
+async function apiRequest<T>(
+  endpoint: string,
+  options: RequestOptions = {}
+): Promise<T> {
+  const { requiresAuth = true, headers = {}, ...fetchOptions } = options;
+
+  const requestHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(headers as Record<string, string>),
+  };
+
+  // Add auth token if required
+  if (requiresAuth) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      requestHeaders['Authorization'] = `Bearer ${token}`;
+    }
+  }
+
+  const url = `${API_BASE_URL}${endpoint}`;
+
+  const response = await fetch(url, {
+    ...fetchOptions,
+    headers: requestHeaders,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error?.message || 'Request failed');
+  }
+
+  return data;
+}
+
+/**
+ * API client methods
+ */
+export const api = {
+  // Auth
+  auth: {
+    login: (email: string, password: string) =>
+      apiRequest('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+        requiresAuth: false,
+      }),
+
+    signup: (email: string, password: string, name: string) =>
+      apiRequest('/api/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, name }),
+        requiresAuth: false,
+      }),
+
+    logout: () =>
+      apiRequest('/api/auth/logout', {
+        method: 'POST',
+      }),
+  },
+
+  // Workflows
+  workflows: {
+    list: (params?: { status?: string; tags?: string[]; limit?: number; skip?: number }) =>
+      apiRequest(`/api/workflows${params ? `?${new URLSearchParams(params as any)}` : ''}`),
+
+    get: (id: string) =>
+      apiRequest(`/api/workflows/${id}`),
+
+    create: (workflow: any) =>
+      apiRequest('/api/workflows', {
+        method: 'POST',
+        body: JSON.stringify(workflow),
+      }),
+
+    update: (id: string, workflow: any) =>
+      apiRequest(`/api/workflows/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(workflow),
+      }),
+
+    delete: (id: string) =>
+      apiRequest(`/api/workflows/${id}`, {
+        method: 'DELETE',
+      }),
+
+    execute: (id: string, input?: any) =>
+      apiRequest(`/api/workflows/${id}/execute`, {
+        method: 'POST',
+        body: JSON.stringify({ input }),
+      }),
+  },
+
+  // Executions
+  executions: {
+    list: (params?: { workflowId?: string; status?: string; limit?: number; skip?: number }) =>
+      apiRequest(`/api/executions${params ? `?${new URLSearchParams(params as any)}` : ''}`),
+
+    get: (id: string) =>
+      apiRequest(`/api/executions/${id}`),
+  },
+
+  // AI
+  ai: {
+    interpret: (prompt: string, dryRun = false) =>
+      apiRequest('/api/ai/interpret', {
+        method: 'POST',
+        body: JSON.stringify({ prompt, dryRun }),
+      }),
+
+    validate: (workflow: any) =>
+      apiRequest('/api/ai/validate', {
+        method: 'POST',
+        body: JSON.stringify({ workflow }),
+      }),
+
+    suggestions: (workflowId: string) =>
+      apiRequest(`/api/ai/suggestions/${workflowId}`),
+  },
+
+  // Settings
+  settings: {
+    get: () =>
+      apiRequest('/api/settings'),
+
+    update: (settings: any) =>
+      apiRequest('/api/settings', {
+        method: 'PUT',
+        body: JSON.stringify(settings),
+      }),
+
+    setApiKey: (service: string, apiKey: string) =>
+      apiRequest('/api/settings/api-keys', {
+        method: 'POST',
+        body: JSON.stringify({ service, apiKey }),
+      }),
+  },
+
+  // Health
+  health: () =>
+    apiRequest('/api/health', { requiresAuth: false }),
+};
+
+export default api;
+
