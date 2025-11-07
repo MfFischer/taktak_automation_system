@@ -10,15 +10,39 @@ import { config } from '../config/environment';
 import { logger } from '../utils/logger';
 import { ValidationError, ExternalServiceError } from '../utils/errors';
 import { SettingsService } from './settingsService';
-import { localLLMService } from './localLLMService';
+import { openRouterService } from './openRouterService';
+
+// Lazy import for localLLMService to avoid top-level await issues with tsx
+let localLLMService: any = null;
+async function getLocalLLMService() {
+  if (!localLLMService) {
+    const module = await import('./localLLMService');
+    localLLMService = module.localLLMService;
+  }
+  return localLLMService;
+}
 
 type AIMode = 'cloud' | 'local' | 'auto';
+type AIProvider = 'gemini' | 'openrouter' | 'phi3' | 'queued';
+
 import { WorkflowService } from './workflowService';
+
+interface QueuedRequest {
+  id: string;
+  prompt: string;
+  timestamp: number;
+  retries: number;
+}
 
 export class AIService {
   private settingsService = new SettingsService();
   private workflowService = new WorkflowService();
   private aiMode: AIMode;
+  private requestQueue: QueuedRequest[] = [];
+  private requestCache: Map<string, { result: any; timestamp: number }> = new Map();
+  private readonly CACHE_SIZE = 50;
+  private readonly CACHE_TTL = 3600000; // 1 hour
+  private lastUsedProvider: AIProvider = 'gemini';
 
   constructor() {
     this.aiMode = (process.env.AI_MODE as AIMode) || 'auto';
@@ -40,45 +64,117 @@ export class AIService {
   }
 
   /**
+   * Get last used AI provider
+   */
+  getLastUsedProvider(): AIProvider {
+    return this.lastUsedProvider;
+  }
+
+  /**
+   * Get queued requests count
+   */
+  getQueuedRequestsCount(): number {
+    return this.requestQueue.length;
+  }
+
+  /**
    * Interprets natural language prompt into workflow
-   * Supports cloud (Gemini), local (Phi-3), and auto (fallback) modes
+   * 4-tier fallback: Gemini → OpenRouter → Phi-3 → Queue
    */
   async interpretPrompt(
     prompt: string,
     userApiKey?: string,
     dryRun: boolean = false
-  ): Promise<{ workflow: Partial<Workflow>; confidence: number; suggestions?: string[]; source: 'cloud' | 'local' }> {
-    // Try cloud first if mode is cloud or auto
+  ): Promise<{ workflow: Partial<Workflow>; confidence: number; suggestions?: string[]; source: AIProvider }> {
+    // Check cache first
+    const cached = this.checkCache(prompt);
+    if (cached) {
+      logger.info('Returning cached result');
+      return cached;
+    }
+
+    const providers: Array<{
+      name: AIProvider;
+      fn: () => Promise<{ workflow: Partial<Workflow>; confidence: number; suggestions?: string[]; source: AIProvider }>;
+      timeout: number;
+    }> = [];
+
+    // Build provider chain based on mode
     if (this.aiMode === 'cloud' || this.aiMode === 'auto') {
-      try {
-        return await this.interpretWithCloud(prompt, userApiKey, dryRun);
-      } catch (error) {
-        logger.warn('Cloud AI failed', {
-          error: error instanceof Error ? error.message : 'Unknown error',
+      // Tier 1: Gemini (fastest, best quality)
+      providers.push({
+        name: 'gemini',
+        fn: () => this.interpretWithGemini(prompt, userApiKey, dryRun),
+        timeout: 8000, // 8 seconds
+      });
+
+      // Tier 2: OpenRouter (fallback, multiple models)
+      if (openRouterService.isConfigured()) {
+        providers.push({
+          name: 'openrouter',
+          fn: () => this.interpretWithOpenRouter(prompt, dryRun),
+          timeout: 12000, // 12 seconds
         });
-
-        // If mode is cloud-only, throw error
-        if (this.aiMode === 'cloud') {
-          throw error;
-        }
-
-        // Otherwise, fallback to local
-        logger.info('Falling back to local AI');
       }
     }
 
-    // Use local AI
-    return await this.interpretWithLocal(prompt, dryRun);
+    // Tier 3: Local Phi-3 (offline, slower)
+    if (this.aiMode === 'local' || this.aiMode === 'auto') {
+      providers.push({
+        name: 'phi3',
+        fn: () => this.interpretWithLocal(prompt, dryRun),
+        timeout: 15000, // 15 seconds
+      });
+    }
+
+    // Try each provider in sequence
+    for (const provider of providers) {
+      try {
+        logger.info(`Trying AI provider: ${provider.name}`);
+
+        const result = await Promise.race([
+          provider.fn(),
+          this.createTimeout(provider.timeout, provider.name),
+        ]);
+
+        // Success! Cache and return
+        this.lastUsedProvider = provider.name;
+        this.cacheResult(prompt, result);
+
+        logger.info(`AI provider succeeded: ${provider.name}`, {
+          confidence: result.confidence,
+        });
+
+        return result;
+      } catch (error) {
+        logger.warn(`AI provider ${provider.name} failed`, {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+
+        // Continue to next provider
+        continue;
+      }
+    }
+
+    // Tier 4: All providers failed - queue for later
+    logger.error('All AI providers failed, queueing request');
+    this.queueRequest(prompt);
+    this.lastUsedProvider = 'queued';
+
+    throw new ExternalServiceError(
+      'AI',
+      'All AI providers are currently unavailable. Your request has been queued and will be processed when a provider becomes available.'
+    );
   }
 
   /**
-   * Interpret prompt using cloud AI (Gemini)
+   * Interpret prompt using Gemini AI
    */
-  private async interpretWithCloud(
+  private async interpretWithGemini(
     prompt: string,
     userApiKey?: string,
     dryRun: boolean = false
-  ): Promise<{ workflow: Partial<Workflow>; confidence: number; suggestions?: string[]; source: 'cloud' }> {
+  ): Promise<{ workflow: Partial<Workflow>; confidence: number; suggestions?: string[]; source: 'gemini' }> {
     const apiKey = userApiKey || config.services.gemini.apiKey || (await this.settingsService.getApiKey('gemini'));
 
     if (!apiKey) {
@@ -106,7 +202,7 @@ export class AIService {
         this.validateGeneratedWorkflow(workflow);
       }
 
-      logger.info('Workflow generated from prompt (cloud)', {
+      logger.info('Workflow generated from prompt (Gemini)', {
         nodeCount: workflow.nodes?.length || 0,
       });
 
@@ -117,7 +213,7 @@ export class AIService {
         workflow,
         confidence,
         suggestions: this.generateSuggestions(workflow),
-        source: 'cloud',
+        source: 'gemini',
       };
     } catch (error) {
       logger.error('Failed to interpret prompt with cloud AI', {
@@ -133,22 +229,68 @@ export class AIService {
   }
 
   /**
+   * Interpret prompt using OpenRouter AI
+   */
+  private async interpretWithOpenRouter(
+    prompt: string,
+    dryRun: boolean = false
+  ): Promise<{ workflow: Partial<Workflow>; confidence: number; suggestions?: string[]; source: 'openrouter' }> {
+    try {
+      logger.info('Using OpenRouter AI', { promptLength: prompt.length });
+
+      // Generate workflow JSON using OpenRouter
+      const text = await openRouterService.generateWorkflow(prompt);
+
+      // Parse JSON from response
+      const workflow = this.parseWorkflowFromResponse(text);
+
+      // Validate workflow structure
+      if (!dryRun) {
+        this.validateGeneratedWorkflow(workflow);
+      }
+
+      logger.info('Workflow generated from prompt (OpenRouter)', {
+        nodeCount: workflow.nodes?.length || 0,
+      });
+
+      // Calculate confidence score (slightly lower than Gemini)
+      const confidence = this.calculateConfidenceScore(workflow, prompt) * 0.98;
+
+      return {
+        workflow,
+        confidence,
+        suggestions: this.generateSuggestions(workflow),
+        source: 'openrouter',
+      };
+    } catch (error) {
+      logger.error('Failed to interpret prompt with OpenRouter', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+
+      throw new ExternalServiceError('OpenRouter', error instanceof Error ? error.message : undefined);
+    }
+  }
+
+  /**
    * Interpret prompt using local AI (Phi-3)
    */
   private async interpretWithLocal(
     prompt: string,
     dryRun: boolean = false
-  ): Promise<{ workflow: Partial<Workflow>; confidence: number; suggestions?: string[]; source: 'local' }> {
+  ): Promise<{ workflow: Partial<Workflow>; confidence: number; suggestions?: string[]; source: 'phi3' }> {
     try {
       logger.info('Using local AI', { promptLength: prompt.length });
 
+      // Get local LLM service (lazy loaded)
+      const llmService = await getLocalLLMService();
+
       // Initialize local LLM if not already done
-      if (!localLLMService.isAvailable()) {
-        await localLLMService.initialize();
+      if (!llmService.isAvailable()) {
+        await llmService.initialize();
       }
 
       // Generate workflow JSON using local LLM
-      const text = await localLLMService.interpretPrompt(prompt);
+      const text = await llmService.interpretPrompt(prompt);
 
       // Parse JSON from response
       const workflow = this.parseWorkflowFromResponse(text);
@@ -169,7 +311,7 @@ export class AIService {
         workflow,
         confidence,
         suggestions: this.generateSuggestions(workflow),
-        source: 'local',
+        source: 'phi3',
       };
     } catch (error) {
       logger.error('Failed to interpret prompt with local AI', {
@@ -442,6 +584,105 @@ Return ONLY valid JSON, no explanations.`;
     });
 
     return Math.round(finalScore * 100) / 100; // Round to 2 decimal places
+  }
+
+  /**
+   * Check cache for previous result
+   */
+  private checkCache(prompt: string): any | null {
+    const cached = this.requestCache.get(prompt);
+
+    if (cached) {
+      const age = Date.now() - cached.timestamp;
+      if (age < this.CACHE_TTL) {
+        return cached.result;
+      } else {
+        // Expired, remove from cache
+        this.requestCache.delete(prompt);
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Cache a result
+   */
+  private cacheResult(prompt: string, result: any): void {
+    // Maintain cache size limit
+    if (this.requestCache.size >= this.CACHE_SIZE) {
+      // Remove oldest entry
+      const firstKey = this.requestCache.keys().next().value;
+      if (firstKey) {
+        this.requestCache.delete(firstKey);
+      }
+    }
+
+    this.requestCache.set(prompt, {
+      result,
+      timestamp: Date.now(),
+    });
+  }
+
+  /**
+   * Create a timeout promise
+   */
+  private createTimeout(ms: number, providerName: string): Promise<never> {
+    return new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error(`${providerName} timeout after ${ms}ms`));
+      }, ms);
+    });
+  }
+
+  /**
+   * Queue a request for later processing
+   */
+  private queueRequest(prompt: string): void {
+    const id = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    this.requestQueue.push({
+      id,
+      prompt,
+      timestamp: Date.now(),
+      retries: 0,
+    });
+
+    logger.info('Request queued', { id, queueSize: this.requestQueue.length });
+  }
+
+  /**
+   * Process queued requests (call this periodically)
+   */
+  async processQueue(): Promise<void> {
+    if (this.requestQueue.length === 0) {
+      return;
+    }
+
+    logger.info('Processing queued requests', { count: this.requestQueue.length });
+
+    const request = this.requestQueue[0];
+
+    try {
+      await this.interpretPrompt(request.prompt);
+
+      // Success - remove from queue
+      this.requestQueue.shift();
+      logger.info('Queued request processed successfully', { id: request.id });
+    } catch (error) {
+      request.retries++;
+
+      if (request.retries >= 3) {
+        // Max retries reached, remove from queue
+        this.requestQueue.shift();
+        logger.error('Queued request failed after max retries', { id: request.id });
+      } else {
+        logger.warn('Queued request failed, will retry', {
+          id: request.id,
+          retries: request.retries,
+        });
+      }
+    }
   }
 }
 

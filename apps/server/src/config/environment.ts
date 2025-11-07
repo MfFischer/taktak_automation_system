@@ -105,6 +105,9 @@ export const config = {
     gemini: {
       apiKey: process.env.GEMINI_API_KEY,
     },
+    openRouter: {
+      apiKey: process.env.OPENROUTER_API_KEY,
+    },
     twilio: {
       accountSid: process.env.TWILIO_ACCOUNT_SID,
       authToken: process.env.TWILIO_AUTH_TOKEN,
@@ -117,6 +120,13 @@ export const config = {
       user: process.env.SMTP_USER,
       password: process.env.SMTP_PASSWORD,
     },
+  },
+
+  // Local LLM configuration
+  localLLM: {
+    modelPath: process.env.LOCAL_LLM_MODEL_PATH || './apps/server/models',
+    contextSize: parseInt(process.env.LOCAL_LLM_CONTEXT_SIZE || '4096', 10),
+    maxTokens: parseInt(process.env.LOCAL_LLM_MAX_TOKENS || '2000', 10),
   },
 } as const;
 
