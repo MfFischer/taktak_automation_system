@@ -149,13 +149,20 @@ router.post(
     }
 
     // Create a new workflow from the template
+    // Include trigger node in the nodes array
+    const allNodes = [
+      template.workflow.trigger,
+      ...template.workflow.nodes,
+    ];
+
     const workflowData = {
       name: customName || template.name,
       description: customDescription || template.description,
       userId,
       status: 'draft' as const,
-      nodes: template.workflow.nodes,
-      edges: template.workflow.edges,
+      nodes: allNodes,
+      connections: template.workflow.connections || [],
+      trigger: template.workflow.trigger,
     };
 
     // Save to database
