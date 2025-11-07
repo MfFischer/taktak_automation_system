@@ -7,6 +7,7 @@ import { Router, Request, Response } from 'express';
 import Joi from 'joi';
 import { asyncHandler } from '../middleware/errorHandler';
 import { validateBody, validateQuery } from '../middleware/validation';
+import { authenticateToken } from '../middleware/auth';
 import {
   getAllTemplates,
   getTemplatesByCategory,
@@ -117,6 +118,7 @@ router.get(
  */
 router.post(
   '/:id/import',
+  authenticateToken,
   validateBody(
     Joi.object({
       customName: Joi.string().optional(),
