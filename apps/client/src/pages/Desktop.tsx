@@ -84,10 +84,10 @@ export default function Desktop() {
     },
   ];
 
-  const downloadLinks = {
-    windows: 'https://github.com/MfFischer/taktak_automation_system/releases/latest/download/Taktak-Setup.exe',
-    mac: 'https://github.com/MfFischer/taktak_automation_system/releases/latest/download/Taktak.dmg',
-    linux: 'https://github.com/MfFischer/taktak_automation_system/releases/latest/download/Taktak.AppImage',
+  // Download links - users need to purchase first
+  const handleDownload = () => {
+    // Redirect to pricing page to purchase
+    navigate('/pricing');
   };
 
   return (
@@ -141,20 +141,23 @@ export default function Desktop() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a
-                href={downloadLinks[platform]}
+              <button
+                onClick={handleDownload}
                 className="btn btn-primary text-lg px-8 py-4 flex items-center gap-2"
               >
                 <Download className="w-5 h-5" />
-                Download for {platform === 'windows' ? 'Windows' : platform === 'mac' ? 'macOS' : 'Linux'}
-              </a>
+                Get Taktak Desktop - $29
+              </button>
               <button
                 onClick={() => navigate('/pricing')}
                 className="btn btn-ghost text-lg px-8 py-4"
               >
-                View Pricing
+                View All Plans
               </button>
             </div>
+            <p className="text-sm text-gray-400 mt-4">
+              One-time payment • Lifetime license • Free updates
+            </p>
 
             <p className="text-sm text-gray-400 mt-4">
               Free trial • No credit card required • {platform === 'windows' ? 'Windows 10+' : platform === 'mac' ? 'macOS 10.15+' : 'Ubuntu 20.04+'}
@@ -253,18 +256,18 @@ export default function Desktop() {
               Join thousands of businesses using Taktak Desktop. One-time payment, lifetime access.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a
-                href={downloadLinks[platform]}
+              <button
+                onClick={handleDownload}
                 className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors inline-flex items-center gap-2"
               >
                 <Download className="w-5 h-5" />
-                Download Now
-              </a>
+                Get Taktak Desktop - $29
+              </button>
               <button
                 onClick={() => navigate('/pricing')}
                 className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-colors"
               >
-                View Pricing
+                View All Plans
               </button>
             </div>
             <p className="text-sm text-blue-100 mt-6">
