@@ -12,6 +12,7 @@ import AIAssistant from './pages/AIAssistant';
 import Templates from './pages/Templates';
 import Pricing from './pages/Pricing';
 import Desktop from './pages/Desktop';
+import Download from './pages/Download';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Privacy from './pages/Privacy';
@@ -40,6 +41,7 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={<Home />} />
         <Route path="/desktop" element={<Desktop />} />
+        <Route path="/download" element={<Download />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

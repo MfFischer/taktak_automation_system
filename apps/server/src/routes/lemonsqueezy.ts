@@ -6,6 +6,7 @@ import { authenticateToken } from '../middleware/auth';
 import { asyncHandler } from '../middleware/errorHandler';
 import { subscriptionService } from '../services/subscriptionService';
 import { LicenseService } from '../services/licenseService';
+import { emailService } from '../services/emailService';
 import { logger } from '../utils/logger';
 
 const licenseService = new LicenseService();
@@ -79,9 +80,11 @@ router.post(
           },
           productOptions: {
             enabledVariants: [variantId],
-            redirectUrl: `${process.env.CLIENT_URL}/app/dashboard?checkout=success`,
-            receiptButtonText: 'Go to Dashboard',
-            receiptThankYouNote: 'Thank you for your purchase! Your license will be delivered shortly.',
+            redirectUrl: productType === 'desktop'
+              ? `${process.env.CLIENT_URL}/download?checkout=success`
+              : `${process.env.CLIENT_URL}/app/dashboard?checkout=success`,
+            receiptButtonText: productType === 'desktop' ? 'Download Now' : 'Go to Dashboard',
+            receiptThankYouNote: 'Thank you for your purchase! Your license key has been sent to your email.',
           },
         }
       );
@@ -375,8 +378,25 @@ async function handleOrderCreated(eventData: any, customData: any): Promise<void
         licenseKey: license.licenseKey,
       });
 
-      // TODO: Send license key via email
-      // await emailService.sendLicenseKey(attributes.user_email, license.licenseKey);
+      // Send license key via email
+      try {
+        await emailService.sendDesktopLicenseEmail(
+          attributes.user_email,
+          license.licenseKey,
+          attributes.user_name
+        );
+        logger.info('Desktop license email sent', {
+          orderId: eventData.id,
+          email: attributes.user_email,
+        });
+      } catch (emailError) {
+        logger.error('Failed to send license email', {
+          error: emailError instanceof Error ? emailError.message : 'Unknown error',
+          orderId: eventData.id,
+          email: attributes.user_email,
+        });
+        // Don't throw - license is created, email can be resent manually
+      }
     } catch (error) {
       logger.error('Failed to create license for order', {
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -443,6 +463,26 @@ async function handleSubscriptionEvent(eventData: any, customData: any): Promise
         userId,
         licenseKey: license.licenseKey,
       });
+
+      // Send license key via email
+      try {
+        await emailService.sendCloudSyncLicenseEmail(
+          attributes.user_email,
+          license.licenseKey,
+          attributes.user_name
+        );
+        logger.info('Cloud sync license email sent', {
+          subscriptionId: eventData.id,
+          email: attributes.user_email,
+        });
+      } catch (emailError) {
+        logger.error('Failed to send license email', {
+          error: emailError instanceof Error ? emailError.message : 'Unknown error',
+          subscriptionId: eventData.id,
+          email: attributes.user_email,
+        });
+        // Don't throw - license is created, email can be resent manually
+      }
     } catch (error) {
       logger.error('Failed to create license for subscription', {
         error: error instanceof Error ? error.message : 'Unknown error',
