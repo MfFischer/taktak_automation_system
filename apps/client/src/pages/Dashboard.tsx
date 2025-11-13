@@ -1,12 +1,65 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Activity, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react';
+import { api } from '../services/api';
+import toast from 'react-hot-toast';
+
+interface DashboardStats {
+  activeWorkflows: number;
+  successfulRuns: number;
+  failedRuns: number;
+  pendingRuns: number;
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const stats = [
+  const [stats, setStats] = useState<DashboardStats>({
+    activeWorkflows: 0,
+    successfulRuns: 0,
+    failedRuns: 0,
+    pendingRuns: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch workflows
+      const workflowsResponse = await api.workflows.list({ limit: 100 });
+      const workflows = workflowsResponse.data || [];
+      const activeWorkflows = workflows.filter((w: any) => w.status === 'active').length;
+
+      // Fetch executions
+      const executionsResponse = await api.executions.list({ limit: 100 });
+      const executions = executionsResponse.data || [];
+
+      const successfulRuns = executions.filter((e: any) => e.status === 'success').length;
+      const failedRuns = executions.filter((e: any) => e.status === 'error').length;
+      const pendingRuns = executions.filter((e: any) => e.status === 'running').length;
+
+      setStats({
+        activeWorkflows,
+        successfulRuns,
+        failedRuns,
+        pendingRuns,
+      });
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error);
+      toast.error('Failed to load dashboard statistics');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const statCards = [
     {
       name: 'Active Workflows',
-      value: '0',
+      value: loading ? '...' : stats.activeWorkflows.toString(),
       icon: Activity,
       color: 'taktak',
       gradient: 'from-taktak-500 to-taktak-600',
@@ -14,7 +67,7 @@ export default function Dashboard() {
     },
     {
       name: 'Successful Runs',
-      value: '0',
+      value: loading ? '...' : stats.successfulRuns.toString(),
       icon: CheckCircle,
       color: 'success',
       gradient: 'from-success-500 to-success-600',
@@ -22,7 +75,7 @@ export default function Dashboard() {
     },
     {
       name: 'Failed Runs',
-      value: '0',
+      value: loading ? '...' : stats.failedRuns.toString(),
       icon: XCircle,
       color: 'error',
       gradient: 'from-error-500 to-error-600',
@@ -30,7 +83,7 @@ export default function Dashboard() {
     },
     {
       name: 'Pending',
-      value: '0',
+      value: loading ? '...' : stats.pendingRuns.toString(),
       icon: Clock,
       color: 'warning',
       gradient: 'from-warning-500 to-warning-600',
@@ -53,7 +106,7 @@ export default function Dashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
+        {statCards.map((stat) => (
           <div
             key={stat.name}
             className="card-interactive animate-fade-in-up"
