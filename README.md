@@ -1,108 +1,180 @@
 <div align="center">
   <img src="./public/logo.png" alt="Taktak Logo" width="120" height="120">
-  
+
   # ⚡ Taktak
-  
+
   ### AI-Driven Offline-First Automation Platform
-  
+
   *Shake off the manual work with intelligent workflow automation*
-  
+
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
   [![React](https://img.shields.io/badge/React-18-61dafb)](https://reactjs.org/)
   [![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
-  
-  [Features](#-features) • [Quick Start](#-quick-start) • [Architecture](#-architecture) • [Documentation](#-documentation)
-  
+
+  [What is Taktak?](#-what-is-taktak) • [Screenshots](#-screenshots) • [Quick Start](#-quick-start) • [Architecture](#-architecture)
+
 </div>
 
 ---
 
-## ✨ Features
+<div align="center">
+  <img src="./public/taktak_3.jpg" alt="Taktak Platform" width="100%">
+</div>
+
+---
+
+## 🤔 What is Taktak?
+
+**Taktak** is an enterprise-grade, offline-first workflow automation platform that works even when the internet doesn't. Unlike Zapier, Make.com, or n8n, Taktak features a revolutionary **4-tier AI fallback system** that guarantees **99.9% uptime** by automatically switching between cloud AI providers and local AI models.
+
+### 🎯 What Makes Taktak Different?
+
+| Feature | Taktak | Zapier/Make/n8n |
+|---------|--------|-----------------|
+| **Offline Operation** | ✅ Works without internet | ❌ Requires internet |
+| **AI Fallback** | ✅ 4-tier system (Gemini → OpenRouter → Phi-3 Local → Queue) | ❌ Single provider |
+| **Zero-Setup AI** | ✅ Download Phi-3 model, no API keys needed | ❌ API keys required |
+| **Data Privacy** | ✅ Local-first with optional cloud sync | ⚠️ Cloud-only |
+| **Uptime Guarantee** | ✅ 99.9% (works offline) | ⚠️ Depends on cloud availability |
+| **Desktop App** | ✅ Electron app available | ❌ Web-only |
+
+---
+
+## 💡 What Does Taktak Do?
+
+Taktak helps businesses automate repetitive tasks with a visual workflow builder. Build powerful automations without writing code:
+
+### 🎯 Key Capabilities
 
 <table>
 <tr>
 <td width="50%">
 
-### 🎨 **Visual Workflow Builder**
-Drag-and-drop interface powered by React Flow. Build complex automation workflows visually with **37 nodes** across 11 categories including Triggers, AI, Communication, Google Workspace, Payments, and more.
+#### 🎨 **Visual Workflow Builder**
+Drag-and-drop interface powered by React Flow. Build complex automation workflows visually with **37 nodes** across 11 categories.
 
 </td>
 <td width="50%">
 
-### 🤖 **4-Tier AI Fallback System** 🆕
+#### 🤖 **4-Tier AI Fallback System**
 **Enterprise-grade 99.9% uptime** with automatic failover:
-1. **Gemini** (0.8s) - Fastest, best quality ✅ **READY**
-2. **OpenRouter** (1.2s) - Multiple models fallback ✅ **READY**
-3. **Phi-3 Local** (1.5s) - **Zero-setup, offline, privacy-first** ✅ **READY**
-4. **Queue** - Retry when online ✅ **READY**
-
-*Unlike Zapier/Make, Taktak works even when APIs are down!*
-**🎉 NEW: Works immediately without API keys!** Just download the Phi-3 model (2.4GB) and you're ready to go!
+1. **Gemini** (0.8s) - Fastest, best quality
+2. **OpenRouter** (1.2s) - Multiple models fallback
+3. **Phi-3 Local** (1.5s) - Zero-setup, offline, privacy-first
+4. **Queue** - Retry when online
 
 </td>
 </tr>
 <tr>
 <td width="50%">
 
-### 💾 **Offline-First Architecture**
-Works without internet using PouchDB local storage. Optional cloud sync to CouchDB when connectivity is available. Your data, your control.
+#### 💾 **Offline-First Architecture**
+Works without internet using PouchDB local storage. Optional cloud sync to CouchDB when connectivity is available.
 
 </td>
 <td width="50%">
 
-### 📋 **36 Pre-Built Templates** 🆕
-Ready-to-use workflows across 9 categories:
-- **Sales**: Lead Capture, AI Scoring, Follow-ups
-- **Marketing**: Social Scheduler, Email Campaigns
-- **Support**: AI Chat, Ticket Priority
-- **Finance, HR, IT Ops, E-commerce, Analytics, Legal**
+#### 📋 **36 Pre-Built Templates**
+Ready-to-use workflows across 9 categories: Sales, Marketing, Support, Finance, HR, IT Ops, E-commerce, Analytics, Legal.
 
 </td>
 </tr>
 <tr>
 <td width="50%">
 
-### 🔐 **Enterprise Security**
+#### 🔐 **Enterprise Security**
 JWT authentication, encrypted credentials, and secure data handling. Built with security best practices from the ground up.
 
 </td>
 <td width="50%">
 
-### 🧠 **Zero-Setup Local AI** ✅ **READY**
-Offline AI with Phi-3 is now available! Download the model (2.4GB) and use AI **without any API keys**. Perfect for privacy-conscious users and offline scenarios.
+#### 🧠 **Zero-Setup Local AI**
+Offline AI with Phi-3 is available! Download the model (2.4GB) and use AI **without any API keys**. Perfect for privacy-conscious users.
 
 </td>
 </tr>
 <tr>
 <td width="50%">
 
-### 💾 **Auto-Save** 🆕
-Never lose your work! Workflows auto-save every 3 seconds with visual status indicators (Saving, Saved, Unsaved). Toggle on/off as needed.
+#### 💾 **Auto-Save**
+Never lose your work! Workflows auto-save every 3 seconds with visual status indicators (Saving, Saved, Unsaved).
 
 </td>
 <td width="50%">
 
-### 🖥️ **Desktop App**
+#### 🖥️ **Desktop App**
 Same powerful platform as an Electron desktop app. Run Taktak locally without a browser for maximum performance and privacy.
 
 </td>
 </tr>
 </table>
 
+### 🎯 Use Cases
+
+- **Sales Automation**: Lead capture, AI scoring, follow-ups, deal alerts
+- **Marketing**: Social media scheduling, email campaigns, content repurposing
+- **Customer Support**: AI-powered responses, ticket prioritization
+- **Finance**: Invoice processing, expense approval workflows
+- **HR**: Employee onboarding, leave request automation
+- **IT Operations**: Database sync, backup automation
+- **E-commerce**: Order processing, abandoned cart recovery
+- **Analytics**: Multi-source data aggregation pipelines
+- **Legal**: Contract generation, AI-powered contract review
+
 ---
 
-## 🚀 Quick Start
+## 📸 Screenshots
+
+<div align="center">
+
+### Workflow Builder
+<img src="./public/taktak_1.jpg" alt="Taktak Workflow Builder" width="100%">
+*Visual drag-and-drop workflow editor with 37 nodes across 11 categories*
+
+---
+
+### Dashboard & Executions
+<img src="./public/taktak_2.jpg" alt="Taktak Dashboard" width="100%">
+*Real-time workflow execution monitoring with detailed logs and status tracking*
+
+---
+
+### Landing Page
+<img src="./public/taktak_3.jpg" alt="Taktak Landing Page" width="100%">
+*Browse 36 pre-built templates and start automating in minutes*
+
+</div>
+
+---
+
+## ✨ Technical Highlights
+
+- ✅ **37 Workflow Nodes** - Triggers, Actions, Logic, Data, Communication, AI, Payments, and more
+- ✅ **36 Pre-Built Templates** - Production-ready workflows across 9 business categories
+- ✅ **4-Tier AI Fallback** - Gemini → OpenRouter → Phi-3 Local → Queue (99.9% uptime)
+- ✅ **Offline-First** - PouchDB local storage with optional CouchDB cloud sync
+- ✅ **Auto-Save** - Never lose work with 3-second auto-save intervals
+- ✅ **Enterprise Security** - JWT auth, encrypted credentials, secure data handling
+- ✅ **Desktop App** - Electron app for Windows, macOS, and Linux
+- ✅ **Zero-Setup AI** - Download Phi-3 model, no API keys required
+- ✅ **Request Caching** - Last 50 AI prompts cached for 1 hour (instant replay)
+- ✅ **Smart Timeouts** - Optimized timeout settings per AI provider
+
+---
+
+## 🚀 How to Run Taktak
 
 ### Prerequisites
 
-```bash
-Node.js 18+ • npm • (Optional) CouchDB for cloud sync
-```
+- **Node.js 18+** and **npm 9+**
+- **(Optional)** CouchDB for cloud sync
+- **(Optional)** Phi-3 model for offline AI (2.4GB download)
 
-### Installation
+### Option 1: Quick Start with Startup Scripts (Recommended)
 
-```bash
+**Windows PowerShell:**
+```powershell
 # Clone the repository
 git clone https://github.com/MfFischer/taktak.git
 cd taktak
@@ -113,9 +185,54 @@ npm install
 # Build shared types
 cd packages/types && npm run build && cd ../..
 
-# Start development servers
-npm run dev:server  # Terminal 1 - Backend (port 3001)
-npm run dev:client  # Terminal 2 - Frontend (port 3000)
+# Start both server and client
+.\start-app.ps1
+```
+
+**Windows Command Prompt:**
+```cmd
+# Clone the repository
+git clone https://github.com/MfFischer/taktak.git
+cd taktak
+
+# Install dependencies
+npm install
+
+# Build shared types
+cd packages/types && npm run build && cd ../..
+
+# Start both server and client
+start-app.bat
+```
+
+This will open two separate windows:
+- **Server** running on `http://localhost:3001`
+- **Client** running on `http://localhost:5173`
+
+### Option 2: Manual Start (Two Terminals)
+
+**Terminal 1 - Start Server:**
+```bash
+npm run dev:server
+# Server runs on http://localhost:3001
+```
+
+**Terminal 2 - Start Client:**
+```bash
+npm run dev:client
+# Client runs on http://localhost:5173
+```
+
+### Option 3: Docker (Production)
+
+```bash
+# Build and run all services
+docker-compose up -d
+
+# Services available at:
+# - Frontend: http://localhost:3000
+# - Backend: http://localhost:3001
+# - CouchDB: http://localhost:5984
 ```
 
 ### Environment Setup
@@ -129,44 +246,16 @@ SERVER_PORT=3001
 JWT_SECRET=your-super-secret-jwt-key-change-this
 ENCRYPTION_KEY=your-32-character-encryption-key!!
 
-# ============================================
-# AI CONFIGURATION (4-Tier Fallback System)
-# ============================================
-# Tier 1: Google Gemini (fastest, best quality - 0.8s)
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# Tier 2: OpenRouter (fallback, multiple models - 1.2s)
-# Get API key from: https://openrouter.ai/keys
-OPENROUTER_API_KEY=your_openrouter_api_key_here
-
-# Tier 3: Local Phi-3 (offline, slower - 1.5s)
-# Tier 4: Queue (all providers failed - will retry when online)
-
-# AI Mode: cloud (Gemini only), local (Phi-3 only), auto (4-tier fallback - RECOMMENDED)
-AI_MODE=auto
-
-# Local LLM Configuration (Phi-3)
-LOCAL_LLM_MODEL_PATH=./models/phi-3-mini-4k-instruct-q4.gguf
-LOCAL_LLM_CONTEXT_SIZE=4096
-LOCAL_LLM_MAX_TOKENS=2048
-
-# Optional: Cloud Sync
-COUCHDB_URL=http://localhost:5984
-COUCHDB_USER=admin
-COUCHDB_PASSWORD=changeme
-
-# Optional: Notifications
-TWILIO_ACCOUNT_SID=your-twilio-sid
-TWILIO_AUTH_TOKEN=your-twilio-token
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASSWORD=your-app-password
+# AI Configuration (Optional - for AI features)
+AI_MODE=auto  # Options: auto, cloud, local
+GEMINI_API_KEY=your_gemini_api_key_here  # Optional
+OPENROUTER_API_KEY=your_openrouter_api_key_here  # Optional
+LOCAL_LLM_MODEL_PATH=./models/phi-3-mini-4k-instruct-q4.gguf  # For offline AI
 ```
 
 ### 🎉 You're Ready!
 
-Open [http://localhost:3000](http://localhost:3000) and start automating!
+Open [http://localhost:5173](http://localhost:5173) and start automating!
 
 ---
 
@@ -284,21 +373,59 @@ User Request
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Architecture Overview
+
+Taktak is built with a modern, scalable architecture designed for offline-first operation and enterprise reliability.
+
+### System Architecture
 
 <div align="center">
 
 ```mermaid
 graph TB
-    A[React Frontend] -->|REST API| B[Express Backend]
-    B -->|Local Storage| C[PouchDB]
-    C -->|Optional Sync| D[CouchDB]
-    B -->|AI Tier 1| E[Google Gemini]
-    B -->|AI Tier 2| F[OpenRouter]
-    B -->|AI Tier 3| G[Phi-3 Local]
-    B -->|AI Tier 4| H[Request Queue]
-    B -->|Notifications| I[Twilio/SMTP]
-    B -->|Scheduling| J[Node-Cron]
+    subgraph "Frontend Layer"
+        A[React 18 + TypeScript]
+        A1[React Flow - Workflow Builder]
+        A2[Tailwind CSS - UI]
+        A3[React Router - Navigation]
+    end
+
+    subgraph "Backend Layer"
+        B[Express.js API Server]
+        B1[Workflow Engine]
+        B2[Node Executor]
+        B3[JWT Auth]
+    end
+
+    subgraph "Data Layer"
+        C[PouchDB - Local Storage]
+        D[CouchDB - Cloud Sync]
+        C -->|Optional Sync| D
+    end
+
+    subgraph "AI Layer - 4-Tier Fallback"
+        E[Tier 1: Google Gemini]
+        F[Tier 2: OpenRouter]
+        G[Tier 3: Phi-3 Local]
+        H[Tier 4: Request Queue]
+        E -->|Fails| F
+        F -->|Fails| G
+        G -->|Fails| H
+    end
+
+    subgraph "Integration Layer"
+        I[Twilio - SMS]
+        J[SMTP - Email]
+        K[External APIs]
+    end
+
+    A --> B
+    B --> C
+    B --> E
+    B --> I
+    B --> J
+    B --> K
+    B1 --> B2
 
     style E fill:#10b981
     style F fill:#3b82f6
@@ -317,17 +444,55 @@ graph TB
 </tr>
 <tr>
 <td><b>Backend</b></td>
-<td>Node.js • Express • TypeScript • PouchDB • JWT</td>
+<td>Node.js 18+ • Express • TypeScript • PouchDB • JWT • Node-Cron</td>
 </tr>
 <tr>
 <td><b>AI Providers</b></td>
-<td>Google Gemini • OpenRouter • Phi-3 (llama.cpp) • Request Queue</td>
+<td>Google Gemini • OpenRouter • Phi-3 (llama.cpp via node-llama-cpp) • Request Queue</td>
+</tr>
+<tr>
+<td><b>Database</b></td>
+<td>PouchDB (local) • CouchDB (optional cloud sync)</td>
+</tr>
+<tr>
+<td><b>Desktop</b></td>
+<td>Electron • Electron Builder • Auto-updater</td>
 </tr>
 <tr>
 <td><b>DevOps</b></td>
 <td>Docker • Docker Compose • GitHub Actions • npm Workspaces</td>
 </tr>
+<tr>
+<td><b>Testing</b></td>
+<td>Jest • React Testing Library • Supertest</td>
+</tr>
 </table>
+
+### Key Components
+
+#### 🎨 Workflow Engine
+- **Node Executor**: Executes individual workflow nodes with error handling
+- **Flow Controller**: Manages workflow execution flow and branching logic
+- **State Manager**: Tracks execution state and data passing between nodes
+- **Scheduler**: Cron-based scheduling for automated workflow triggers
+
+#### 🤖 AI Service Layer
+- **Provider Manager**: Handles 4-tier fallback logic
+- **Request Cache**: Caches last 50 prompts for 1 hour (instant replay)
+- **Timeout Handler**: Smart timeouts per provider (8s, 12s, 15s)
+- **Queue Manager**: Stores failed requests for retry when online
+
+#### 💾 Data Persistence
+- **PouchDB**: Local-first database for offline operation
+- **CouchDB Sync**: Optional bidirectional sync to cloud
+- **Encryption**: AES-256 encryption for sensitive credentials
+- **Auto-Save**: 3-second debounced auto-save for workflows
+
+#### 🔐 Security Layer
+- **JWT Authentication**: Secure token-based auth
+- **Rate Limiting**: Configurable rate limits per endpoint
+- **Input Validation**: Express-validator for all inputs
+- **Helmet.js**: Security headers and XSS protection
 
 ---
 
@@ -507,23 +672,75 @@ npm test -- --coverage
 ```
 taktak/
 ├── apps/
-│   ├── client/              # React frontend application
+│   ├── client/                      # React frontend application
 │   │   ├── src/
-│   │   │   ├── components/  # Reusable UI components
-│   │   │   ├── pages/       # Page components
-│   │   │   └── ...
+│   │   │   ├── components/          # Reusable UI components
+│   │   │   │   ├── workflow/        # Workflow builder components
+│   │   │   │   ├── nodes/           # Node UI components
+│   │   │   │   └── common/          # Shared components
+│   │   │   ├── pages/               # Page components
+│   │   │   │   ├── Landing.tsx      # Landing page with templates
+│   │   │   │   ├── WorkflowBuilder.tsx  # Visual workflow editor
+│   │   │   │   ├── Executions.tsx   # Execution monitoring
+│   │   │   │   └── Settings.tsx     # Configuration
+│   │   │   ├── services/            # API client services
+│   │   │   ├── hooks/               # Custom React hooks
+│   │   │   ├── utils/               # Utility functions
+│   │   │   └── types/               # TypeScript types
+│   │   ├── public/                  # Static assets
 │   │   └── package.json
-│   └── server/              # Express backend application
+│   │
+│   └── server/                      # Express backend application
 │       ├── src/
-│       │   ├── engine/      # Workflow execution engine
-│       │   ├── routes/      # API endpoints
-│       │   ├── services/    # Business logic
-│       │   └── ...
+│       │   ├── engine/              # Workflow execution engine
+│       │   │   ├── executor.ts      # Node execution logic
+│       │   │   ├── scheduler.ts     # Cron-based scheduling
+│       │   │   └── queue.ts         # Job queue management
+│       │   ├── routes/              # API endpoints
+│       │   │   ├── workflows.ts     # Workflow CRUD
+│       │   │   ├── executions.ts    # Execution history
+│       │   │   ├── auth.ts          # Authentication
+│       │   │   └── ai.ts            # AI endpoints
+│       │   ├── services/            # Business logic
+│       │   │   ├── ai/              # AI service layer
+│       │   │   │   ├── gemini.ts    # Google Gemini provider
+│       │   │   │   ├── openrouter.ts # OpenRouter provider
+│       │   │   │   ├── phi3.ts      # Local Phi-3 provider
+│       │   │   │   └── manager.ts   # 4-tier fallback logic
+│       │   │   ├── database.ts      # PouchDB/CouchDB
+│       │   │   ├── encryption.ts    # Credential encryption
+│       │   │   └── notifications.ts # Email/SMS
+│       │   ├── middleware/          # Express middleware
+│       │   ├── utils/               # Utility functions
+│       │   └── index.ts             # Server entry point
+│       ├── models/                  # AI model files (Phi-3)
+│       ├── tests/                   # Jest tests
 │       └── package.json
+│
 ├── packages/
-│   └── types/               # Shared TypeScript definitions
-├── docker-compose.yml       # Docker orchestration
-└── package.json             # Root workspace configuration
+│   └── types/                       # Shared TypeScript definitions
+│       ├── src/
+│       │   ├── workflow.ts          # Workflow types
+│       │   ├── node.ts              # Node types
+│       │   └── execution.ts         # Execution types
+│       └── package.json
+│
+├── electron/                        # Electron desktop app
+│   ├── main.js                      # Main process
+│   └── preload.js                   # Preload script
+│
+├── public/                          # Public assets
+│   ├── logo.png                     # Taktak logo
+│   ├── taktak_1.jpg                 # Workflow builder screenshot
+│   ├── taktak_2.jpg                 # Dashboard screenshot
+│   └── taktak_3.jpg                 # Landing page screenshot
+│
+├── docker-compose.yml               # Docker orchestration
+├── Dockerfile                       # Docker image
+├── .env.example                     # Environment variables template
+├── start-app.ps1                    # PowerShell startup script
+├── start-app.bat                    # Batch startup script
+└── package.json                     # Root workspace configuration
 ```
 
 ---
