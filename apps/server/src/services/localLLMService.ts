@@ -1,12 +1,18 @@
 /**
  * Local LLM Service
  * Provides offline AI capabilities using Phi-3 via llama.cpp
+ * Using node-llama-cpp v3.x API (ESM)
  */
 
 import { getLlama, LlamaModel, LlamaContext, LlamaChatSession } from 'node-llama-cpp';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger.js';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+// ESM-compatible __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 interface LocalLLMConfig {
   modelPath: string;
@@ -22,8 +28,11 @@ class LocalLLMService {
   private isInitialized = false;
 
   constructor() {
+    // Default model path is relative to the server app directory
+    const defaultModelPath = path.resolve(__dirname, '../../models/phi-3-mini-4k-instruct-q4.gguf');
+
     this.config = {
-      modelPath: process.env.LOCAL_LLM_MODEL_PATH || './models/phi-3-mini-4k-instruct-q4.gguf',
+      modelPath: process.env.LOCAL_LLM_MODEL_PATH || defaultModelPath,
       contextSize: parseInt(process.env.LOCAL_LLM_CONTEXT_SIZE || '4096', 10),
       maxTokens: parseInt(process.env.LOCAL_LLM_MAX_TOKENS || '2048', 10),
     };
@@ -49,7 +58,7 @@ class LocalLLMService {
 
       logger.info('Initializing local LLM', { modelPath });
 
-      // Get llama instance
+      // Get llama instance (v3.x API)
       const llama = await getLlama();
 
       // Load the model
@@ -87,7 +96,7 @@ class LocalLLMService {
   /**
    * Generate text using local LLM
    */
-  async generate(prompt: string, _systemPrompt?: string): Promise<string> {
+  async generate(prompt: string, systemPrompt?: string): Promise<string> {
     if (!this.isAvailable()) {
       await this.initialize();
     }
@@ -101,11 +110,14 @@ class LocalLLMService {
         promptLength: prompt.length,
       });
 
-      // Generate response using the session
-      const response = await this.session.prompt(prompt, {
+      // Combine system prompt and user prompt if provided
+      const fullPrompt = systemPrompt
+        ? `${systemPrompt}\n\nUser: ${prompt}\n\nAssistant:`
+        : prompt;
+
+      // Generate response using the session (v3.x API)
+      const response = await this.session.prompt(fullPrompt, {
         maxTokens: this.config.maxTokens,
-        temperature: 0.7,
-        topP: 0.9,
       });
 
       logger.info('Local LLM generation completed', {
@@ -171,10 +183,11 @@ Rules:
    */
   async cleanup(): Promise<void> {
     if (this.context) {
-      // Note: node-llama-cpp handles cleanup automatically
+      await this.context.dispose();
       this.context = null;
     }
     if (this.model) {
+      await this.model.dispose();
       this.model = null;
     }
     this.isInitialized = false;

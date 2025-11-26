@@ -14,10 +14,24 @@ import { openRouterService } from './openRouterService';
 
 // Lazy import for localLLMService to avoid top-level await issues with tsx
 let localLLMService: any = null;
+let localLLMLoadFailed = false;
+
 async function getLocalLLMService() {
+  if (localLLMLoadFailed) {
+    throw new Error('Local LLM module failed to load previously');
+  }
+
   if (!localLLMService) {
-    const module = await import('./localLLMService');
-    localLLMService = module.localLLMService;
+    try {
+      const module = await import('./localLLMService.js');
+      localLLMService = module.localLLMService;
+    } catch (error) {
+      localLLMLoadFailed = true;
+      logger.warn('Failed to load local LLM module - skipping local AI tier', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      throw new Error('Local LLM module not available');
+    }
   }
   return localLLMService;
 }
@@ -118,12 +132,12 @@ export class AIService {
       }
     }
 
-    // Tier 3: Local Phi-3 (offline, slower)
+    // Tier 3: Local Phi-3 (offline, slower - first load can take 60-120s)
     if (this.aiMode === 'local' || this.aiMode === 'auto') {
       providers.push({
         name: 'phi3',
         fn: () => this.interpretWithLocal(prompt, dryRun),
-        timeout: 15000, // 15 seconds
+        timeout: 180000, // 3 minutes (first load can take 60-120s)
       });
     }
 

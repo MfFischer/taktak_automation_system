@@ -81,3 +81,10 @@ dist-electron/
 *.rpm
 *.snap
 
+# AI Models (large files)
+*.gguf
+apps/server/models/*.gguf
+
+# Test databases
+apps/server/test_*/
+

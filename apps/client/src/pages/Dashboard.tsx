@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Activity, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
+import { UsageStats } from '../components/UsageStats';
+import { ExecutionHistoryChart } from '../components/ExecutionHistoryChart';
+import OnboardingTour, { useOnboarding } from '../components/OnboardingTour';
 
 interface DashboardStats {
   activeWorkflows: number;
@@ -13,6 +16,7 @@ interface DashboardStats {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { showOnboarding, completeOnboarding } = useOnboarding();
   const [stats, setStats] = useState<DashboardStats>({
     activeWorkflows: 0,
     successfulRuns: 0,
@@ -30,16 +34,17 @@ export default function Dashboard() {
       setLoading(true);
 
       // Fetch workflows
-      const workflowsResponse = await api.workflows.list({ limit: 100 });
+      const workflowsResponse = await api.workflows.list({ limit: 100 }) as any;
       const workflows = workflowsResponse.data || [];
-      const activeWorkflows = workflows.filter((w: any) => w.status === 'active').length;
+      // Count all workflows that are not disabled (draft, active, paused)
+      const activeWorkflows = workflows.filter((w: any) => w.status !== 'disabled').length;
 
       // Fetch executions
-      const executionsResponse = await api.executions.list({ limit: 100 });
+      const executionsResponse = await api.executions.list({ limit: 100 }) as any;
       const executions = executionsResponse.data || [];
 
       const successfulRuns = executions.filter((e: any) => e.status === 'success').length;
-      const failedRuns = executions.filter((e: any) => e.status === 'error').length;
+      const failedRuns = executions.filter((e: any) => e.status === 'failed').length;
       const pendingRuns = executions.filter((e: any) => e.status === 'running').length;
 
       setStats({
@@ -93,6 +98,14 @@ export default function Dashboard() {
 
   return (
     <div className="p-8 space-y-8">
+      {/* Onboarding Tour */}
+      {showOnboarding && (
+        <OnboardingTour
+          onComplete={completeOnboarding}
+          onSkip={completeOnboarding}
+        />
+      )}
+
       {/* Header */}
       <div className="animate-fade-in-down">
         <div className="flex items-center space-x-3 mb-2">
@@ -132,6 +145,16 @@ export default function Dashboard() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Usage Stats & Execution History */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+          <UsageStats />
+        </div>
+        <div className="animate-fade-in-up" style={{ animationDelay: '350ms' }}>
+          <ExecutionHistoryChart />
+        </div>
       </div>
 
       {/* Getting Started */}

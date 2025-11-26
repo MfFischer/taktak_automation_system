@@ -11,6 +11,20 @@ Taktak uses **Phi-3-mini-4k-instruct** for local AI capabilities. This model is 
 
 ### Download Instructions
 
+#### **🚀 Quick Start (Windows PowerShell - Recommended)**
+
+Run this ONE command to download automatically:
+
+```powershell
+Invoke-WebRequest -Uri "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf" -OutFile "phi-3-mini-4k-instruct-q4.gguf"
+```
+
+**Note:** Download is ~2.4GB and may take 10-30 minutes.
+
+---
+
+#### **📥 Alternative Download Methods**
+
 1. **Download the model** from Hugging Face:
    ```bash
    # Option 1: Using wget (Linux/Mac)
@@ -22,6 +36,9 @@ Taktak uses **Phi-3-mini-4k-instruct** for local AI capabilities. This model is 
    # Option 3: Manual download (Windows/All)
    # Visit: https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf
    # Download: Phi-3-mini-4k-instruct-q4.gguf (~2.4GB)
+
+   # Option 4: Direct download link
+   # Click: https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf
    ```
 
 2. **Place the model** in this directory:
