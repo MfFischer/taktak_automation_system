@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, Zap, Cloud, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
+import { Check, Zap, Cloud, Sparkles, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import api from '../services/api';
@@ -90,6 +90,24 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Navigation */}
+      <header className="border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Home
+          </button>
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="Taktak" className="w-8 h-8 object-contain" />
+            <span className="text-xl font-bold text-gradient">Taktak</span>
+          </div>
+        </div>
+      </header>
+
       {/* Header */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
@@ -175,6 +193,7 @@ export default function Pricing() {
 
                 {/* CTA Button */}
                 <button
+                  type="button"
                   onClick={() => handleCheckout(product)}
                   disabled={checkoutLoading === product.id}
                   className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2 ${
@@ -256,6 +275,7 @@ export default function Pricing() {
               Join thousands of businesses using Taktak to streamline their operations and save time.
             </p>
             <button
+              type="button"
               onClick={() => navigate('/signup')}
               className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors duration-300 inline-flex items-center gap-2"
             >

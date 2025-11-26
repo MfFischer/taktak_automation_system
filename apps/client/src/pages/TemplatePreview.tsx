@@ -192,8 +192,8 @@ export default function TemplatePreview() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen bg-dark-bg flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-taktak-500"></div>
       </div>
     );
   }
@@ -208,13 +208,13 @@ export default function TemplatePreview() {
 
   if (!displayData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-dark-bg flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Template Not Found</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Template Not Found</h2>
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="text-purple-600 hover:text-purple-700"
+            className="text-taktak-400 hover:text-taktak-300"
           >
             ← Back to Home
           </button>
@@ -226,50 +226,44 @@ export default function TemplatePreview() {
   const IconComponent = staticTemplate?.icon || Zap;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-dark-bg">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-8 py-6">
+      <div className="bg-dark-surface border-b border-dark-border px-8 py-6">
         <div className="max-w-7xl mx-auto">
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="text-gray-600 hover:text-gray-900 mb-4 flex items-center gap-2"
+            className="text-gray-400 hover:text-white mb-4 flex items-center gap-2 transition-colors"
           >
             ← Back to Home
           </button>
-          <div className="flex justify-between items-start">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-6">
             <div className="flex items-start gap-4">
-              {staticTemplate && (
-                <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${staticTemplate.color} flex items-center justify-center`}>
-                  <IconComponent className="w-8 h-8 text-white" />
-                </div>
-              )}
+              <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${staticTemplate?.color || 'from-taktak-500 to-purple-600'} flex items-center justify-center shadow-lg`}>
+                <IconComponent className="w-8 h-8 text-white" />
+              </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{displayData.name}</h1>
-                <p className="text-gray-600 mb-4">{displayData.description}</p>
-                <div className="flex gap-2">
+                <h1 className="text-3xl font-bold text-white mb-2">{displayData.name}</h1>
+                <p className="text-gray-400 mb-4 max-w-xl">{displayData.description}</p>
+                <div className="flex gap-2 flex-wrap">
                   {(displayData.tags || [displayData.category]).map((tag: string) => (
-                    <span key={tag} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                    <span key={tag} className="px-3 py-1 bg-taktak-500/20 text-taktak-400 rounded-full text-sm border border-taktak-500/30">
                       {tag}
                     </span>
                   ))}
+                  <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm border border-green-500/30">
+                    {staticTemplate?.nodes?.length || 4} Steps
+                  </span>
                 </div>
               </div>
             </div>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={handleTryWithoutSignup}
-                className="px-6 py-3 border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors font-semibold"
-              >
-                🚀 Try Without Signup
-              </button>
+            <div className="flex gap-3 flex-shrink-0">
               <button
                 type="button"
                 onClick={handleUseTemplate}
-                className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold"
+                className="px-6 py-3 bg-gradient-to-r from-taktak-500 to-purple-600 text-white rounded-lg hover:opacity-90 transition-opacity font-semibold shadow-lg"
               >
-                Use This Template
+                Use This Template →
               </button>
             </div>
           </div>
@@ -277,18 +271,38 @@ export default function TemplatePreview() {
       </div>
 
       {/* Workflow Preview */}
-      <div className="h-[calc(100vh-200px)] p-8">
-        <div className="max-w-7xl mx-auto h-full bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="h-[calc(100vh-220px)] p-6">
+        <div className="max-w-7xl mx-auto h-full bg-dark-surface rounded-xl border border-dark-border overflow-hidden shadow-xl">
           <ReactFlow
             nodes={nodes}
             edges={edges}
             fitView
             attributionPosition="bottom-right"
+            style={{ background: '#0f0f14' }}
           >
-            <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-            <Controls />
-            <MiniMap position="bottom-left" />
+            <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#333" />
+            <Controls className="!bg-dark-surface !border-dark-border" />
+            <MiniMap position="bottom-left" className="!bg-dark-surface" />
           </ReactFlow>
+        </div>
+      </div>
+
+      {/* Bottom CTA Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-dark-surface/95 backdrop-blur-xl border-t border-dark-border px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="text-gray-400">
+            <span className="text-white font-semibold">{displayData.name}</span> • Preview mode
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-500">Sign up to customize and execute this workflow</span>
+            <button
+              type="button"
+              onClick={handleUseTemplate}
+              className="px-6 py-2 bg-gradient-to-r from-taktak-500 to-purple-600 text-white rounded-lg hover:opacity-90 transition-opacity font-semibold"
+            >
+              Get Started Free
+            </button>
+          </div>
         </div>
       </div>
     </div>

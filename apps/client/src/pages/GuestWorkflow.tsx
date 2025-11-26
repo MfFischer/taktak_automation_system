@@ -58,7 +58,7 @@ export default function GuestWorkflow() {
       setNodes(flowNodes);
       setEdges(flowEdges);
     } else {
-      navigate('/templates');
+      navigate('/');
     }
 
     // Show signup prompt after 30 seconds
@@ -91,6 +91,7 @@ export default function GuestWorkflow() {
           </div>
         </div>
         <button
+          type="button"
           onClick={handleSignup}
           className="px-6 py-2 bg-white text-purple-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
         >
@@ -114,12 +115,14 @@ export default function GuestWorkflow() {
 
           <Panel position="top-right" className="flex gap-2">
             <button
-              onClick={() => navigate('/templates')}
+              type="button"
+              onClick={() => navigate('/')}
               className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              ← Back to Templates
+              ← Back to Home
             </button>
             <button
+              type="button"
               onClick={handleExecute}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors opacity-50 cursor-not-allowed"
               disabled
@@ -144,12 +147,14 @@ export default function GuestWorkflow() {
               </p>
               <div className="space-y-3">
                 <button
+                  type="button"
                   onClick={handleSignup}
                   className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold"
                 >
                   Sign Up Free - No Credit Card Required
                 </button>
                 <button
+                  type="button"
                   onClick={() => setShowSignupPrompt(false)}
                   className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >

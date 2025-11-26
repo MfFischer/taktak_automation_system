@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight, Sparkles,
   Workflow, Bot, Cloud, Lock, Mail, LogIn,
-  Loader2, Twitter, Linkedin,
+  Loader2, Linkedin, Github,
   Zap, Shield, Clock, Server, Cpu, Globe,
   FileSpreadsheet, MessageSquare, Calendar, CreditCard,
   Play, CheckCircle2, ChevronRight, Star,
@@ -805,11 +805,11 @@ export default function Home() {
                 Shake off the manual work with AI-powered automation that never fails.
               </p>
               <div className="flex items-center space-x-4 pt-4">
-                <a href="#" className="text-gray-400 hover:text-white transition-colors" title="Follow us on Twitter" aria-label="Twitter">
-                  <Twitter className="w-5 h-5" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors" title="Connect on LinkedIn" aria-label="LinkedIn">
+                <a href="https://www.linkedin.com/in/maria-fe-fischer/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors" title="Connect on LinkedIn" aria-label="LinkedIn">
                   <Linkedin className="w-5 h-5" />
+                </a>
+                <a href="https://github.com/MfFischer/taktak" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors" title="View on GitHub" aria-label="GitHub">
+                  <Github className="w-5 h-5" />
                 </a>
               </div>
             </div>
@@ -829,7 +829,6 @@ export default function Home() {
               <ul className="space-y-2 text-sm text-gray-400">
                 <li><button type="button" onClick={() => navigate('/about')} className="hover:text-white transition-colors">About Us</button></li>
                 <li><button type="button" onClick={() => navigate('/contact')} className="hover:text-white transition-colors">Contact</button></li>
-                <li><button type="button" onClick={() => navigate('/careers')} className="hover:text-white transition-colors">Careers</button></li>
               </ul>
             </div>
 

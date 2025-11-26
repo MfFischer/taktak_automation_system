@@ -24,6 +24,7 @@ import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Cookies from './pages/Cookies';
 import Contact from './pages/Contact';
+import About from './pages/About';
 
 // Simple auth check
 const isAuthenticated = () => {
@@ -53,6 +54,7 @@ function AppContent() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/cookies" element={<Cookies />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/about" element={<About />} />
         <Route path="/templates/:id/preview" element={<TemplatePreview />} />
         <Route path="/workflow/guest" element={<GuestWorkflow />} />
 
