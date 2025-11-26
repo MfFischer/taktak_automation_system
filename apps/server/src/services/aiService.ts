@@ -430,9 +430,25 @@ export class AIService {
    * Builds system prompt for workflow generation
    */
   private buildSystemPrompt(): string {
+    const validNodeTypes = Object.values(NodeType);
     return `You are a workflow automation expert. Convert natural language descriptions into structured workflow JSON.
 
-Available node types: ${Object.values(NodeType).join(', ')}
+CRITICAL: You MUST use ONLY these exact node type values (case-sensitive, snake_case):
+${validNodeTypes.map(t => `- "${t}"`).join('\n')}
+
+Common mappings:
+- For email: use "send_email" or "gmail"
+- For SMS/text: use "send_sms" or "twilio"
+- For API calls: use "http_request"
+- For scheduled tasks: use "schedule"
+- For incoming webhooks: use "webhook"
+- For conditions/if: use "condition"
+- For loops: use "loop"
+- For delays/wait: use "delay"
+- For Slack: use "slack"
+- For Discord: use "discord"
+- For AI text generation: use "ai_generate"
+- For data transformation: use "transform"
 
 Workflow structure:
 {
@@ -441,19 +457,29 @@ Workflow structure:
   "status": "draft",
   "nodes": [
     {
-      "id": "unique-id",
-      "type": "node_type",
+      "id": "node-1",
+      "type": "schedule",
       "name": "Node name",
-      "config": { /* node-specific config */ }
+      "config": { "cron": "0 9 * * *" },
+      "position": { "x": 100, "y": 100 }
     }
   ],
   "connections": [
-    { "from": "node-id-1", "to": "node-id-2" }
+    { "from": "node-1", "to": "node-2" }
   ],
-  "trigger": { /* trigger node */ }
+  "trigger": {
+    "id": "node-1",
+    "type": "schedule",
+    "name": "Trigger",
+    "config": { "cron": "0 9 * * *" }
+  }
 }
 
-Return ONLY valid JSON, no explanations.`;
+IMPORTANT:
+1. The "trigger" object MUST reference an existing node from the "nodes" array
+2. Use only node types from the list above - DO NOT invent new types
+3. Include position {x, y} for each node
+4. Return ONLY valid JSON, no explanations or markdown`;
   }
 
   /**
@@ -465,10 +491,99 @@ Return ONLY valid JSON, no explanations.`;
     const jsonText = jsonMatch ? jsonMatch[1] : text;
 
     try {
-      return JSON.parse(jsonText);
+      const workflow = JSON.parse(jsonText) as Partial<Workflow>;
+      // Normalize node types to fix common AI mistakes
+      return this.normalizeWorkflowNodeTypes(workflow);
     } catch (error) {
       throw new ValidationError('Failed to parse workflow JSON from AI response');
     }
+  }
+
+  /**
+   * Normalizes node types to match valid NodeType enum values
+   * AI sometimes generates similar but invalid type names
+   */
+  private normalizeWorkflowNodeTypes(workflow: Partial<Workflow>): Partial<Workflow> {
+    const typeMapping: Record<string, NodeType> = {
+      // Common AI mistakes -> correct values
+      'email': NodeType.SEND_EMAIL,
+      'mail': NodeType.SEND_EMAIL,
+      'sendEmail': NodeType.SEND_EMAIL,
+      'send-email': NodeType.SEND_EMAIL,
+      'sms': NodeType.SEND_SMS,
+      'sendSms': NodeType.SEND_SMS,
+      'send-sms': NodeType.SEND_SMS,
+      'text': NodeType.SEND_SMS,
+      'http': NodeType.HTTP_REQUEST,
+      'api': NodeType.HTTP_REQUEST,
+      'httpRequest': NodeType.HTTP_REQUEST,
+      'http-request': NodeType.HTTP_REQUEST,
+      'request': NodeType.HTTP_REQUEST,
+      'cron': NodeType.SCHEDULE,
+      'timer': NodeType.SCHEDULE,
+      'scheduled': NodeType.SCHEDULE,
+      'trigger': NodeType.WEBHOOK,
+      'if': NodeType.CONDITION,
+      'branch': NodeType.CONDITION,
+      'switch': NodeType.CONDITION,
+      'foreach': NodeType.LOOP,
+      'for': NodeType.LOOP,
+      'iterate': NodeType.LOOP,
+      'wait': NodeType.DELAY,
+      'sleep': NodeType.DELAY,
+      'pause': NodeType.DELAY,
+      'ai': NodeType.AI_GENERATE,
+      'gpt': NodeType.OPENAI,
+      'chatgpt': NodeType.OPENAI,
+      'claude': NodeType.ANTHROPIC,
+      'database': NodeType.DATABASE_QUERY,
+      'db': NodeType.DATABASE_QUERY,
+      'query': NodeType.DATABASE_QUERY,
+      'sheets': NodeType.GOOGLE_SHEETS,
+      'spreadsheet': NodeType.GOOGLE_SHEETS,
+      'drive': NodeType.GOOGLE_DRIVE,
+      'calendar': NodeType.GOOGLE_CALENDAR,
+      'shopify': NodeType.POS_SHOPIFY,
+      'square': NodeType.POS_SQUARE,
+    };
+
+    const validTypes = new Set(Object.values(NodeType));
+
+    const normalizeType = (type: string): NodeType => {
+      // Already valid
+      if (validTypes.has(type as NodeType)) {
+        return type as NodeType;
+      }
+      // Check mapping (case-insensitive)
+      const lowerType = type.toLowerCase().replace(/[_-]/g, '');
+      for (const [key, value] of Object.entries(typeMapping)) {
+        if (key.toLowerCase().replace(/[_-]/g, '') === lowerType) {
+          logger.info(`Normalized node type: "${type}" -> "${value}"`);
+          return value;
+        }
+      }
+      // Default to http_request for unknown types
+      logger.warn(`Unknown node type "${type}", defaulting to http_request`);
+      return NodeType.HTTP_REQUEST;
+    };
+
+    // Normalize nodes
+    if (workflow.nodes) {
+      workflow.nodes = workflow.nodes.map(node => ({
+        ...node,
+        type: normalizeType(node.type as string),
+      }));
+    }
+
+    // Normalize trigger
+    if (workflow.trigger) {
+      workflow.trigger = {
+        ...workflow.trigger,
+        type: normalizeType(workflow.trigger.type as string),
+      };
+    }
+
+    return workflow;
   }
 
   /**

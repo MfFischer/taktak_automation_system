@@ -43,9 +43,14 @@ export const UsageStats: React.FC = () => {
   const fetchUsageData = async () => {
     try {
       setLoading(true);
-      const response = await api.get<UsageData>('/api/auth/usage');
-      setUsageData(response);
-      setError(null);
+      const response = await api.get<{ success: boolean; data: UsageData }>('/api/auth/usage');
+      // API returns { success: true, data: {...} }
+      if (response.success && response.data) {
+        setUsageData(response.data);
+        setError(null);
+      } else {
+        setError('Invalid response format');
+      }
     } catch (err) {
       setError('Failed to load usage data');
       console.error('Error fetching usage data:', err);
@@ -73,7 +78,30 @@ export const UsageStats: React.FC = () => {
     );
   }
 
-  const { tier, usage, limits, percentUsed } = usageData;
+  // Provide default values if any field is undefined
+  const tier = usageData.tier || UserTier.FREE;
+  const usage = usageData.usage || {
+    executionsThisMonth: 0,
+    executionsLastReset: new Date().toISOString(),
+    activeWorkflows: 0,
+  };
+  const limits = usageData.limits || {
+    executionsPerMonth: 100,
+    maxActiveWorkflows: 3,
+    features: {
+      cloudSync: false,
+      advancedAnalytics: false,
+      prioritySupport: false,
+      customIntegrations: false,
+      teamWorkspaces: false,
+      whiteLabel: false,
+      sso: false,
+    },
+  };
+  const percentUsed = usageData.percentUsed || {
+    executions: 0,
+    workflows: 0,
+  };
   const isUnlimited = (value: number) => value === -1;
 
   return (
