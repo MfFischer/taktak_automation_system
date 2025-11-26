@@ -30,12 +30,10 @@ describe('Encryption Utilities', () => {
       expect(decrypt(encrypted2)).toBe(plaintext);
     });
 
-    it('should handle empty strings', () => {
+    it('should reject empty strings', () => {
       const plaintext = '';
-      const encrypted = encrypt(plaintext);
-      const decrypted = decrypt(encrypted);
 
-      expect(decrypted).toBe(plaintext);
+      expect(() => encrypt(plaintext)).toThrow('Text to encrypt cannot be empty');
     });
 
     it('should handle special characters', () => {

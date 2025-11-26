@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Node } from 'reactflow';
 import { X, Calendar, Clock, Database, Globe, MessageSquare, Mail, Sparkles } from 'lucide-react';
 import { NodeType } from '@taktak/types';
+import { NodeExecutionConfigPanel, NodeExecutionConfig } from '../NodeExecutionConfigPanel';
+import { LoopNodeConfigPanel } from '../LoopNodeConfig';
+import { ErrorHandlingConfig } from '../ErrorHandlingConfig';
 
 interface NodeConfigPanelProps {
   node: Node;
@@ -12,14 +15,23 @@ interface NodeConfigPanelProps {
 export default function NodeConfigPanel({ node, onClose, onUpdate }: NodeConfigPanelProps) {
   const [config, setConfig] = useState(node.data.config || {});
   const [label, setLabel] = useState(node.data.label || '');
+  const [executionConfig, setExecutionConfig] = useState<NodeExecutionConfig>(node.data.executionConfig || {});
+  const [errorConfig, setErrorConfig] = useState(node.data.errorConfig || { enabled: false });
 
   useEffect(() => {
     setConfig(node.data.config || {});
     setLabel(node.data.label || '');
+    setExecutionConfig(node.data.executionConfig || {});
+    setErrorConfig(node.data.errorConfig || { enabled: false });
   }, [node]);
 
   const handleSave = () => {
-    onUpdate(node.id, { ...config, label });
+    onUpdate(node.id, {
+      ...config,
+      label,
+      executionConfig,
+      errorConfig
+    });
     onClose();
   };
 
@@ -355,6 +367,34 @@ export default function NodeConfigPanel({ node, onClose, onUpdate }: NodeConfigP
           <h3 className="text-sm font-medium mb-3">Configuration</h3>
           {renderConfigFields()}
         </div>
+
+        {/* Loop Node Configuration */}
+        {node.data.nodeType === NodeType.LOOP && (
+          <div className="mt-4">
+            <LoopNodeConfigPanel
+              config={config}
+              onChange={(newConfig) => setConfig(newConfig)}
+            />
+          </div>
+        )}
+
+        {/* Execution Configuration */}
+        <div className="mt-4">
+          <NodeExecutionConfigPanel
+            config={executionConfig}
+            onChange={setExecutionConfig}
+          />
+        </div>
+
+        {/* Error Handling Configuration */}
+        {node.data.nodeType === NodeType.ERROR_TRIGGER && (
+          <div className="mt-4">
+            <ErrorHandlingConfig
+              config={errorConfig}
+              onChange={setErrorConfig}
+            />
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">

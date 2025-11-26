@@ -37,21 +37,24 @@ export class ExecutionService {
         selector.status = status;
       }
 
+      // Fetch all matching documents without sorting (to avoid index requirement)
       const result = await this.db.find({
         selector,
-        sort: [{ startedAt: 'desc' }],
-        limit,
-        skip,
       });
 
-      const countResult = await this.db.find({
-        selector,
-        fields: ['_id'],
+      // Sort in memory by startedAt (descending - newest first)
+      const sortedDocs = (result.docs as WorkflowExecution[]).sort((a, b) => {
+        const dateA = a.startedAt ? new Date(a.startedAt).getTime() : 0;
+        const dateB = b.startedAt ? new Date(b.startedAt).getTime() : 0;
+        return dateB - dateA; // Descending order
       });
+
+      // Apply pagination in memory
+      const paginatedDocs = sortedDocs.slice(skip, skip + limit);
 
       return {
-        executions: result.docs as WorkflowExecution[],
-        total: countResult.docs.length,
+        executions: paginatedDocs,
+        total: sortedDocs.length,
       };
     } catch (error) {
       logger.error('Failed to list executions', {

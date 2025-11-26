@@ -191,6 +191,36 @@ export async function closeDatabases(): Promise<void> {
 }
 
 /**
+ * Creates a unique test database instance
+ * Use this in tests to avoid database lock conflicts
+ */
+export function createTestDatabase(testName?: string): PouchDB.Database {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(7);
+  const dbName = testName
+    ? `test_${testName}_${timestamp}_${random}`
+    : `test_${timestamp}_${random}`;
+
+  return new PouchDB(dbName, {
+    auto_compaction: true,
+  });
+}
+
+/**
+ * Destroys a test database and cleans up
+ */
+export async function destroyTestDatabase(db: PouchDB.Database): Promise<void> {
+  try {
+    await db.destroy();
+  } catch (error) {
+    // Ignore errors during cleanup
+    logger.debug('Error destroying test database', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+}
+
+/**
  * Compacts database to reclaim space
  */
 export async function compactDatabase(db: PouchDB.Database): Promise<void> {
@@ -238,5 +268,7 @@ export default {
   compactDatabase,
   getDatabaseInfo,
   checkRemoteConnection,
+  createTestDatabase,
+  destroyTestDatabase,
 };
 

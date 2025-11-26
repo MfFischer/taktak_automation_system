@@ -3,6 +3,8 @@ import { Send, Sparkles, Loader2, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
+import { api } from '../services/api';
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -50,42 +52,69 @@ export default function AIAssistant() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const userPrompt = input;
     setInput('');
     setIsLoading(true);
 
     try {
-      // TODO: Implement actual API call to /api/ai/interpret
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Call the actual AI API to interpret the prompt
+      const response = await api.ai.interpret(userPrompt, false) as any;
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: "I've created a workflow based on your description. Here's what it will do:",
+        content: response.data.explanation || "I've created a workflow based on your description.",
         timestamp: new Date(),
-        workflow: {
-          name: 'Generated Workflow',
-          description: input,
-          nodes: [],
-        },
+        workflow: response.data.workflow ? {
+          name: response.data.workflow.name || 'Generated Workflow',
+          description: response.data.workflow.description || userPrompt,
+          nodes: response.data.workflow.nodes || [],
+        } : undefined,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
       toast.success('Workflow generated successfully');
-    } catch (error) {
-      toast.error('Failed to generate workflow');
+    } catch (error: any) {
+      const errorMessage = error.message || 'Failed to generate workflow';
+      toast.error(errorMessage);
       console.error('AI error:', error);
+
+      // Add error message to chat
+      const errorAssistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: `Sorry, I encountered an error: ${errorMessage}. Please try again with a different description.`,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorAssistantMessage]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCreateWorkflow = (workflow: Message['workflow']) => {
+  const handleCreateWorkflow = async (workflow: Message['workflow']) => {
     if (!workflow) return;
 
-    // TODO: Save workflow and navigate to editor
-    toast.success('Opening workflow editor...');
-    navigate('/workflows/new');
+    try {
+      // Save the AI-generated workflow
+      const response = await api.workflows.create({
+        name: workflow.name,
+        description: workflow.description,
+        nodes: workflow.nodes,
+        connections: [], // AI should provide connections in the workflow object
+        trigger: workflow.nodes[0], // First node as trigger
+      }) as any;
+
+      const newWorkflowId = response.data._id;
+
+      toast.success('Workflow created successfully!');
+
+      // Navigate to the workflow editor
+      navigate(`/app/workflows/${newWorkflowId}`);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to create workflow');
+      console.error('Create workflow error:', error);
+    }
   };
 
   return (

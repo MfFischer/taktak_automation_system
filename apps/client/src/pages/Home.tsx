@@ -81,96 +81,59 @@ export default function Home() {
 
   // Sample workflows for showcase
   const sampleWorkflows = [
-    {
-      id: 'lead-capture',
-      name: 'Lead Capture to CRM',
-      description: 'Automatically capture leads from forms and add them to your CRM with AI enrichment',
-      icon: FileSpreadsheet,
-      category: 'Sales',
-      nodes: ['Webhook', 'AI Enrich', 'Google Sheets', 'Slack Notify'],
-      color: 'from-blue-500 to-cyan-500',
-    },
-    {
-      id: 'customer-support',
-      name: 'AI Customer Support',
-      description: 'Intelligent ticket routing with AI-powered responses and escalation',
-      icon: MessageSquare,
-      category: 'Support',
-      nodes: ['Email Trigger', 'AI Classify', 'Condition', 'Auto Reply'],
-      color: 'from-purple-500 to-pink-500',
-    },
-    {
-      id: 'invoice-automation',
-      name: 'Invoice Processing',
-      description: 'Extract data from invoices, validate, and sync to accounting software',
-      icon: CreditCard,
-      category: 'Finance',
-      nodes: ['File Upload', 'AI Extract', 'Validate', 'QuickBooks'],
-      color: 'from-green-500 to-emerald-500',
-    },
-    {
-      id: 'social-scheduler',
-      name: 'Social Media Scheduler',
-      description: 'AI-generated content scheduled across multiple platforms',
-      icon: Calendar,
-      category: 'Marketing',
-      nodes: ['Schedule', 'AI Generate', 'Twitter', 'LinkedIn'],
-      color: 'from-orange-500 to-red-500',
-    },
-    {
-      id: 'data-sync',
-      name: 'Database Sync',
-      description: 'Keep multiple databases in sync with real-time change detection',
-      icon: Database,
-      category: 'IT Ops',
-      nodes: ['DB Trigger', 'Transform', 'Postgres', 'MySQL'],
-      color: 'from-indigo-500 to-violet-500',
-    },
-    {
-      id: 'alert-system',
-      name: 'Smart Alert System',
-      description: 'Monitor KPIs and send AI-contextualized alerts to the right team',
-      icon: Bell,
-      category: 'Operations',
-      nodes: ['Metric Poll', 'AI Analyze', 'Condition', 'Multi-Notify'],
-      color: 'from-yellow-500 to-amber-500',
-    },
-    {
-      id: 'onboarding',
-      name: 'Employee Onboarding',
-      description: 'Automate new hire setup across HR, IT, and communication tools',
-      icon: Users,
-      category: 'HR',
-      nodes: ['Form Submit', 'Create Accounts', 'Send Welcome', 'Schedule Training'],
-      color: 'from-teal-500 to-cyan-500',
-    },
-    {
-      id: 'ecommerce',
-      name: 'E-commerce Order Flow',
-      description: 'Process orders, update inventory, and notify customers automatically',
-      icon: ShoppingCart,
-      category: 'E-commerce',
-      nodes: ['Order Webhook', 'Inventory Check', 'Payment', 'Ship Notify'],
-      color: 'from-rose-500 to-pink-500',
-    },
-    {
-      id: 'document-gen',
-      name: 'Document Generation',
-      description: 'Generate contracts, reports, and documents from templates with AI',
-      icon: FileText,
-      category: 'Legal',
-      nodes: ['Data Input', 'AI Fill', 'PDF Generate', 'Email Send'],
-      color: 'from-slate-500 to-gray-600',
-    },
-    {
-      id: 'analytics',
-      name: 'Analytics Pipeline',
-      description: 'Aggregate data from multiple sources into unified dashboards',
-      icon: BarChart3,
-      category: 'Analytics',
-      nodes: ['Multi-Source', 'Transform', 'Aggregate', 'Dashboard Push'],
-      color: 'from-cyan-500 to-blue-500',
-    },
+    // Sales Workflows
+    { id: 'lead-capture', name: 'Lead Capture to CRM', description: 'Automatically capture leads from forms and add them to your CRM with AI enrichment', icon: FileSpreadsheet, category: 'Sales', nodes: ['Webhook', 'AI Enrich', 'CRM', 'Notify'], color: 'from-blue-500 to-cyan-500' },
+    { id: 'lead-scoring', name: 'AI Lead Scoring', description: 'Score and prioritize leads automatically based on behavior and demographics', icon: Star, category: 'Sales', nodes: ['CRM Trigger', 'AI Score', 'Update Lead', 'Alert'], color: 'from-blue-600 to-indigo-500' },
+    { id: 'sales-followup', name: 'Sales Follow-up', description: 'Automated follow-up sequences based on prospect engagement', icon: Mail, category: 'Sales', nodes: ['Schedule', 'Check Status', 'Send Email', 'Update CRM'], color: 'from-cyan-500 to-blue-500' },
+    { id: 'deal-alerts', name: 'Deal Stage Alerts', description: 'Notify sales team when deals move stages or need attention', icon: Bell, category: 'Sales', nodes: ['CRM Webhook', 'Condition', 'Slack', 'Email'], color: 'from-blue-400 to-cyan-400' },
+
+    // Marketing Workflows
+    { id: 'social-scheduler', name: 'Social Media Scheduler', description: 'AI-generated content scheduled across multiple platforms', icon: Calendar, category: 'Marketing', nodes: ['Schedule', 'AI Generate', 'Twitter', 'LinkedIn'], color: 'from-orange-500 to-red-500' },
+    { id: 'email-campaign', name: 'Email Campaign Automation', description: 'Send personalized email campaigns based on user segments', icon: Mail, category: 'Marketing', nodes: ['Segment', 'AI Personalize', 'Send Email', 'Track'], color: 'from-pink-500 to-rose-500' },
+    { id: 'content-repurpose', name: 'Content Repurposing', description: 'Transform blog posts into social media content automatically', icon: Sparkles, category: 'Marketing', nodes: ['RSS Feed', 'AI Transform', 'Multi-Post', 'Analytics'], color: 'from-orange-400 to-pink-500' },
+    { id: 'webinar-followup', name: 'Webinar Follow-up', description: 'Automated attendee follow-up with personalized content', icon: Users, category: 'Marketing', nodes: ['Zoom Webhook', 'Segment', 'AI Email', 'CRM Update'], color: 'from-red-500 to-orange-500' },
+
+    // Support Workflows
+    { id: 'customer-support', name: 'AI Customer Support', description: 'Intelligent ticket routing with AI-powered responses and escalation', icon: MessageSquare, category: 'Support', nodes: ['Email', 'AI Classify', 'Route', 'Reply'], color: 'from-purple-500 to-pink-500' },
+    { id: 'ticket-priority', name: 'Ticket Auto-Priority', description: 'Automatically prioritize support tickets based on urgency and customer tier', icon: Zap, category: 'Support', nodes: ['New Ticket', 'AI Analyze', 'Set Priority', 'Assign'], color: 'from-violet-500 to-purple-500' },
+    { id: 'satisfaction-survey', name: 'Satisfaction Survey', description: 'Automatically send surveys after ticket resolution', icon: Star, category: 'Support', nodes: ['Ticket Closed', 'Wait', 'Send Survey', 'Log Response'], color: 'from-purple-400 to-pink-400' },
+    { id: 'escalation-workflow', name: 'Smart Escalation', description: 'Escalate tickets based on SLA breaches and sentiment', icon: Bell, category: 'Support', nodes: ['Monitor', 'Check SLA', 'AI Sentiment', 'Escalate'], color: 'from-pink-500 to-purple-500' },
+
+    // Finance Workflows
+    { id: 'invoice-automation', name: 'Invoice Processing', description: 'Extract data from invoices, validate, and sync to accounting software', icon: CreditCard, category: 'Finance', nodes: ['Upload', 'AI Extract', 'Validate', 'Sync'], color: 'from-green-500 to-emerald-500' },
+    { id: 'expense-approval', name: 'Expense Approval', description: 'Route expense reports for approval based on amount and category', icon: FileSpreadsheet, category: 'Finance', nodes: ['Submit', 'Validate', 'Route', 'Notify'], color: 'from-emerald-500 to-teal-500' },
+    { id: 'payment-reminder', name: 'Payment Reminders', description: 'Automated payment reminders for overdue invoices', icon: Clock, category: 'Finance', nodes: ['Check Due', 'Condition', 'Send Email', 'Update'], color: 'from-green-400 to-emerald-400' },
+    { id: 'budget-alerts', name: 'Budget Alerts', description: 'Alert when spending approaches budget limits', icon: Bell, category: 'Finance', nodes: ['Daily Check', 'Calculate', 'Threshold', 'Alert'], color: 'from-teal-500 to-green-500' },
+
+    // HR Workflows
+    { id: 'onboarding', name: 'Employee Onboarding', description: 'Automate new hire setup across HR, IT, and communication tools', icon: Users, category: 'HR', nodes: ['Form', 'Create Accounts', 'Welcome', 'Schedule'], color: 'from-teal-500 to-cyan-500' },
+    { id: 'leave-request', name: 'Leave Request Automation', description: 'Handle leave requests with automatic approval routing', icon: Calendar, category: 'HR', nodes: ['Request', 'Check Balance', 'Route', 'Update'], color: 'from-cyan-500 to-teal-500' },
+    { id: 'performance-review', name: 'Performance Review', description: 'Automate review cycles with reminders and tracking', icon: Star, category: 'HR', nodes: ['Schedule', 'Notify', 'Collect', 'Aggregate'], color: 'from-teal-400 to-cyan-400' },
+    { id: 'offboarding', name: 'Employee Offboarding', description: 'Revoke access and process exit procedures automatically', icon: Shield, category: 'HR', nodes: ['Exit Trigger', 'Revoke Access', 'Final Pay', 'Archive'], color: 'from-cyan-600 to-teal-600' },
+
+    // IT Ops Workflows
+    { id: 'data-sync', name: 'Database Sync', description: 'Keep multiple databases in sync with real-time change detection', icon: Database, category: 'IT Ops', nodes: ['DB Trigger', 'Transform', 'Sync', 'Log'], color: 'from-indigo-500 to-violet-500' },
+    { id: 'server-monitor', name: 'Server Monitoring', description: 'Monitor server health and alert on anomalies', icon: Server, category: 'IT Ops', nodes: ['Poll', 'AI Analyze', 'Threshold', 'Alert'], color: 'from-violet-500 to-indigo-500' },
+    { id: 'backup-automation', name: 'Backup Automation', description: 'Scheduled backups with verification and alerts', icon: Cloud, category: 'IT Ops', nodes: ['Schedule', 'Backup', 'Verify', 'Notify'], color: 'from-indigo-400 to-violet-400' },
+    { id: 'incident-response', name: 'Incident Response', description: 'Automated incident detection and team notification', icon: Bell, category: 'IT Ops', nodes: ['Alert Trigger', 'Classify', 'Page Team', 'Create Ticket'], color: 'from-violet-600 to-indigo-600' },
+
+    // E-commerce Workflows
+    { id: 'ecommerce', name: 'Order Processing', description: 'Process orders, update inventory, and notify customers automatically', icon: ShoppingCart, category: 'E-commerce', nodes: ['Order', 'Inventory', 'Payment', 'Notify'], color: 'from-rose-500 to-pink-500' },
+    { id: 'abandoned-cart', name: 'Abandoned Cart Recovery', description: 'Send personalized reminders for abandoned shopping carts', icon: Mail, category: 'E-commerce', nodes: ['Cart Event', 'Wait', 'AI Email', 'Track'], color: 'from-pink-500 to-rose-500' },
+    { id: 'inventory-alert', name: 'Low Stock Alerts', description: 'Alert when inventory drops below threshold', icon: Bell, category: 'E-commerce', nodes: ['Monitor', 'Check Stock', 'Alert', 'Reorder'], color: 'from-rose-400 to-pink-400' },
+    { id: 'review-request', name: 'Review Request', description: 'Request product reviews after delivery confirmation', icon: Star, category: 'E-commerce', nodes: ['Delivered', 'Wait', 'Send Request', 'Log'], color: 'from-pink-400 to-rose-400' },
+
+    // Analytics Workflows
+    { id: 'analytics', name: 'Analytics Pipeline', description: 'Aggregate data from multiple sources into unified dashboards', icon: BarChart3, category: 'Analytics', nodes: ['Sources', 'Transform', 'Aggregate', 'Push'], color: 'from-cyan-500 to-blue-500' },
+    { id: 'report-generation', name: 'Automated Reports', description: 'Generate and distribute reports on schedule', icon: FileText, category: 'Analytics', nodes: ['Schedule', 'Query', 'Generate', 'Email'], color: 'from-blue-500 to-cyan-500' },
+    { id: 'anomaly-detection', name: 'Anomaly Detection', description: 'AI-powered detection of unusual patterns in data', icon: Sparkles, category: 'Analytics', nodes: ['Data Stream', 'AI Analyze', 'Detect', 'Alert'], color: 'from-cyan-400 to-blue-400' },
+    { id: 'kpi-tracking', name: 'KPI Dashboard Updates', description: 'Automatically update KPI dashboards with fresh data', icon: BarChart3, category: 'Analytics', nodes: ['Schedule', 'Fetch Data', 'Calculate', 'Update'], color: 'from-blue-400 to-cyan-400' },
+
+    // Legal Workflows
+    { id: 'document-gen', name: 'Contract Generation', description: 'Generate contracts and documents from templates with AI', icon: FileText, category: 'Legal', nodes: ['Input', 'AI Fill', 'Generate', 'Send'], color: 'from-slate-500 to-gray-600' },
+    { id: 'contract-review', name: 'AI Contract Review', description: 'AI-powered contract analysis and risk identification', icon: Shield, category: 'Legal', nodes: ['Upload', 'AI Analyze', 'Flag Risks', 'Summary'], color: 'from-gray-500 to-slate-500' },
+    { id: 'compliance-check', name: 'Compliance Monitoring', description: 'Monitor for compliance violations and alert stakeholders', icon: Lock, category: 'Legal', nodes: ['Monitor', 'Check Rules', 'Flag', 'Report'], color: 'from-slate-400 to-gray-500' },
+    { id: 'nda-tracking', name: 'NDA Expiry Tracking', description: 'Track NDA expirations and send renewal reminders', icon: Calendar, category: 'Legal', nodes: ['Daily Check', 'Calculate', 'Alert', 'Update'], color: 'from-gray-400 to-slate-400' },
   ];
 
   // Workflow categories

@@ -1,5 +1,8 @@
 import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 
 import Layout from './components/Layout';
 import Home from './pages/Home';
@@ -10,6 +13,8 @@ import Executions from './pages/Executions';
 import Settings from './pages/Settings';
 import AIAssistant from './pages/AIAssistant';
 import Templates from './pages/Templates';
+import TemplatePreview from './pages/TemplatePreview';
+import GuestWorkflow from './pages/GuestWorkflow';
 import Pricing from './pages/Pricing';
 import Desktop from './pages/Desktop';
 import Download from './pages/Download';
@@ -18,6 +23,7 @@ import Signup from './pages/Signup';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Cookies from './pages/Cookies';
+import Contact from './pages/Contact';
 
 // Simple auth check
 const isAuthenticated = () => {
@@ -29,14 +35,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return isAuthenticated() ? <>{children}</> : <Navigate to="/" replace />;
 };
 
-function App() {
-  useEffect(() => {
-    // Force dark mode
-    document.documentElement.classList.add('dark');
-  }, []);
+function AppContent() {
+  useKeyboardShortcuts();
 
   return (
-    <div className="min-h-screen bg-dark-bg">
+    <>
+      <KeyboardShortcutsModal />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Home />} />
@@ -48,6 +52,9 @@ function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/cookies" element={<Cookies />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/templates/:id/preview" element={<TemplatePreview />} />
+        <Route path="/workflow/guest" element={<GuestWorkflow />} />
 
         {/* Protected routes */}
         <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
@@ -61,7 +68,17 @@ function App() {
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
-    </div>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
+        <AppContent />
+      </div>
+    </ThemeProvider>
   );
 }
 

@@ -1,10 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Node, Edge } from 'reactflow';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, History } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import WorkflowCanvas from '../components/workflow/WorkflowCanvas';
+import { WorkflowVersionHistory } from '../components/WorkflowVersionHistory';
 import { api } from '../services/api';
 
 interface WorkflowNode {
@@ -40,6 +41,7 @@ export default function WorkflowEditor() {
   const [workflow, setWorkflow] = useState<Workflow | null>(null);
   const [initialNodes, setInitialNodes] = useState<Node[]>([]);
   const [initialEdges, setInitialEdges] = useState<Edge[]>([]);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
 
   // Fetch workflow data if editing existing workflow
   useEffect(() => {
@@ -95,32 +97,85 @@ export default function WorkflowEditor() {
     async (nodes: Node[], edges: Edge[]) => {
       setIsSaving(true);
       try {
-        // TODO: Implement API call to save workflow
-        console.log('Saving workflow:', { name: workflowName, nodes, edges });
+        // Convert React Flow nodes to workflow nodes
+        const workflowNodes: WorkflowNode[] = nodes.map((node) => ({
+          id: node.id,
+          type: node.data.nodeType || 'CUSTOM',
+          name: node.data.label || 'Untitled Node',
+          config: node.data.config || {},
+          position: node.position,
+        }));
 
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Convert React Flow edges to workflow connections
+        const workflowConnections: WorkflowConnection[] = edges.map((edge) => ({
+          from: edge.source,
+          to: edge.target,
+          condition: edge.label as string | undefined,
+        }));
 
-        toast.success('Workflow saved successfully');
-      } catch (error) {
-        toast.error('Failed to save workflow');
+        // Find the trigger node (first node or node with trigger type)
+        const triggerNode = workflowNodes.find(
+          (node) => node.type === 'SCHEDULE' || node.type === 'WEBHOOK' || node.type === 'DATABASE_WATCH'
+        ) || workflowNodes[0];
+
+        if (!triggerNode) {
+          toast.error('Workflow must have at least one node');
+          return;
+        }
+
+        const workflowData = {
+          name: workflowName,
+          description: workflow?.description || '',
+          nodes: workflowNodes,
+          connections: workflowConnections,
+          trigger: triggerNode,
+        };
+
+        if (id) {
+          // Update existing workflow
+          await api.workflows.update(id, workflowData);
+          toast.success('Workflow updated successfully');
+        } else {
+          // Create new workflow
+          const response = await api.workflows.create(workflowData) as any;
+          const newWorkflowId = response.data._id;
+
+          toast.success('Workflow created successfully');
+
+          // Navigate to the new workflow editor
+          navigate(`/app/workflows/${newWorkflowId}`);
+        }
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to save workflow');
         console.error('Save error:', error);
       } finally {
         setIsSaving(false);
       }
     },
-    [workflowName]
+    [workflowName, workflow, id, navigate]
   );
 
   const handleExecute = useCallback(async () => {
+    if (!id) {
+      toast.error('Please save the workflow before executing');
+      return;
+    }
+
     try {
-      // TODO: Implement API call to execute workflow
       console.log('Executing workflow:', id);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Call the actual API to execute the workflow
+      const result = await api.workflows.execute(id, {});
 
-      toast.success('Workflow execution started');
+      toast.success('Workflow executed successfully!');
+      console.log('Execution result:', result);
+
+      // Refresh workflow data to get updated status
+      const updatedWorkflow = await api.workflows.get(id) as any;
+      if (updatedWorkflow?.data) {
+        setWorkflowName(updatedWorkflow.data.name);
+        // The workflow should now be 'active' after first execution
+      }
     } catch (error) {
       toast.error('Failed to execute workflow');
       console.error('Execute error:', error);
@@ -168,9 +223,19 @@ export default function WorkflowEditor() {
               {id ? `Editing: ${id.substring(0, 20)}...` : 'New Workflow'}
             </span>
             {workflow && (
-              <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                {workflow.status}
-              </span>
+              <>
+                <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                  {workflow.status}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowVersionHistory(!showVersionHistory)}
+                  className="flex items-center gap-2 px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <History className="w-4 h-4" />
+                  Version History
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -186,6 +251,33 @@ export default function WorkflowEditor() {
           onExecute={handleExecute}
         />
       </div>
+
+      {/* Version History Modal */}
+      {showVersionHistory && id && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-2xl font-bold">Version History</h2>
+              <button
+                type="button"
+                onClick={() => setShowVersionHistory(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="overflow-y-auto max-h-[calc(80vh-80px)]">
+              <WorkflowVersionHistory
+                workflowId={id}
+                onRollback={() => {
+                  setShowVersionHistory(false);
+                  window.location.reload();
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

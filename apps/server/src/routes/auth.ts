@@ -5,14 +5,16 @@
 import { Router } from 'express';
 import Joi from 'joi';
 
-import { AuthService } from '../services/authService';
-import { asyncHandler } from '../middleware/errorHandler';
-import { validateBody } from '../middleware/validation';
-import { authenticateToken } from '../middleware/auth';
+import { AuthService, UserTier } from '../services/authService.js';
+import { UsageLimitsService } from '../services/usageLimitsService.js';
+import { asyncHandler } from '../middleware/errorHandler.js';
+import { validateBody } from '../middleware/validation.js';
+import { authenticateToken } from '../middleware/auth.js';
 import { ApiResponse } from '@taktak/types';
 
 const router = Router();
 const authService = new AuthService();
+const usageLimitsService = new UsageLimitsService();
 
 // Validation schemas
 const registerSchema = Joi.object({
@@ -133,6 +135,55 @@ router.post(
     const response: ApiResponse<{ message: string }> = {
       success: true,
       data: { message: 'Password changed successfully' },
+    };
+
+    res.json(response);
+  })
+);
+
+/**
+ * GET /api/auth/usage
+ * Get current user's usage stats and limits
+ */
+router.get(
+  '/usage',
+  authenticateToken,
+  asyncHandler(async (req, res) => {
+    const { tier, usageStats } = req.user!;
+    const limits = usageLimitsService.getTierLimits(tier || UserTier.FREE);
+
+    // Provide fallback for usageStats if undefined (for old users)
+    const stats = usageStats || {
+      executionsThisMonth: 0,
+      executionsLastReset: new Date().toISOString(),
+      activeWorkflows: 0,
+    };
+
+    const response: ApiResponse<{
+      tier: string;
+      usage: typeof stats;
+      limits: typeof limits;
+      percentUsed: {
+        executions: number;
+        workflows: number;
+      };
+    }> = {
+      success: true,
+      data: {
+        tier: tier || UserTier.FREE,
+        usage: stats,
+        limits,
+        percentUsed: {
+          executions:
+            limits.executionsPerMonth === -1
+              ? 0
+              : Math.round((stats.executionsThisMonth / limits.executionsPerMonth) * 100),
+          workflows:
+            limits.maxActiveWorkflows === -1
+              ? 0
+              : Math.round((stats.activeWorkflows / limits.maxActiveWorkflows) * 100),
+        },
+      },
     };
 
     res.json(response);

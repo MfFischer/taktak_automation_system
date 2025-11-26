@@ -8,11 +8,14 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config/environment';
 import { AuthenticationError } from '../utils/errors';
 import { logger } from '../utils/logger';
+import { UserTier, UsageStats } from '../services/authService';
 
 export interface AuthUser {
   id: string;
   email: string;
   name: string;
+  tier: UserTier;
+  usageStats: UsageStats;
 }
 
 // Extend Express Request type

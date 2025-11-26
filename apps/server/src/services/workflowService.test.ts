@@ -43,14 +43,15 @@ describe('WorkflowService', () => {
         ],
         connections: [
           {
-            id: 'conn-1',
-            source: 'node-1',
-            target: 'node-2',
+            from: 'node-1',
+            to: 'node-2',
           },
         ],
         trigger: {
-          type: 'schedule',
-          nodeId: 'node-1',
+          id: 'node-1',
+          type: NodeType.SCHEDULE,
+          name: 'Schedule Trigger',
+          config: { cron: '0 0 * * *' },
         },
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -129,8 +130,10 @@ describe('WorkflowService', () => {
         ],
         connections: [],
         trigger: {
-          type: 'schedule',
-          nodeId: 'non-existent-node',
+          id: 'non-existent-node',
+          type: NodeType.SCHEDULE,
+          name: 'Schedule Trigger',
+          config: { cron: '0 0 * * *' },
         },
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -139,7 +142,7 @@ describe('WorkflowService', () => {
       expect(() => {
         // @ts-expect-error - accessing private method for testing
         service.validateWorkflowStructure(workflow);
-      }).toThrow('Trigger node not found');
+      }).toThrow('Trigger node must exist in workflow nodes');
     });
 
     it('should reject workflow with invalid connections', () => {
@@ -159,14 +162,15 @@ describe('WorkflowService', () => {
         ],
         connections: [
           {
-            id: 'conn-1',
-            source: 'node-1',
-            target: 'non-existent-node',
+            from: 'node-1',
+            to: 'non-existent-node',
           },
         ],
         trigger: {
-          type: 'schedule',
-          nodeId: 'node-1',
+          id: 'node-1',
+          type: NodeType.SCHEDULE,
+          name: 'Schedule Trigger',
+          config: { cron: '0 9 * * *' },
         },
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -175,7 +179,7 @@ describe('WorkflowService', () => {
       expect(() => {
         // @ts-expect-error - accessing private method for testing
         service.validateWorkflowStructure(workflow);
-      }).toThrow('Invalid connection');
+      }).toThrow('Connection references non-existent node');
     });
   });
 });

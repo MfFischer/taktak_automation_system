@@ -57,11 +57,19 @@ export const config = {
     password: process.env.REDIS_PASSWORD || undefined,
   },
 
-  // Security
+  // Security - Commercial grade defaults
   security: {
     jwtSecret: process.env.JWT_SECRET || 'change-this-in-production',
     encryptionKey: process.env.ENCRYPTION_KEY || 'change-this-32-char-key-prod!!',
     sessionSecret: process.env.SESSION_SECRET || 'change-this-session-secret',
+    // Token expiration settings
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
+    // Password policy
+    minPasswordLength: parseInt(process.env.MIN_PASSWORD_LENGTH || '12', 10),
+    requireSpecialChars: process.env.REQUIRE_SPECIAL_CHARS !== 'false',
+    // Session settings
+    maxConcurrentSessions: parseInt(process.env.MAX_CONCURRENT_SESSIONS || '5', 10),
   },
 
   // Rate limiting
@@ -131,22 +139,56 @@ export const config = {
 } as const;
 
 /**
- * Validates configuration at startup
+ * Validates configuration at startup - Commercial grade security checks
  */
 export function validateConfig(): void {
-  // Warn about insecure defaults in production
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  // Critical: Block production with insecure defaults
   if (config.isProduction) {
     if (config.security.jwtSecret === 'change-this-in-production') {
-      console.warn('WARNING: Using default JWT secret in production!');
+      errors.push('CRITICAL: JWT_SECRET must be set in production!');
     }
     if (config.security.encryptionKey === 'change-this-32-char-key-prod!!') {
-      console.warn('WARNING: Using default encryption key in production!');
+      errors.push('CRITICAL: ENCRYPTION_KEY must be set in production!');
+    }
+    if (config.security.sessionSecret === 'change-this-session-secret') {
+      errors.push('CRITICAL: SESSION_SECRET must be set in production!');
+    }
+  } else {
+    // Warnings for development
+    if (config.security.jwtSecret === 'change-this-in-production') {
+      warnings.push('Using default JWT secret - OK for development only');
     }
   }
 
   // Validate encryption key length
   if (config.security.encryptionKey.length !== 32) {
-    throw new Error('ENCRYPTION_KEY must be exactly 32 characters');
+    errors.push('ENCRYPTION_KEY must be exactly 32 characters');
+  }
+
+  // Validate JWT secret strength
+  if (config.security.jwtSecret.length < 32) {
+    warnings.push('JWT_SECRET should be at least 32 characters for security');
+  }
+
+  // Log warnings
+  warnings.forEach((w) => console.warn(`⚠️  ${w}`));
+
+  // Throw if critical errors in production
+  if (errors.length > 0 && config.isProduction) {
+    console.error('\n🚨 SECURITY CONFIGURATION ERRORS:');
+    errors.forEach((e) => console.error(`   ❌ ${e}`));
+    console.error('\nApplication cannot start with insecure configuration in production.\n');
+    throw new Error('Security configuration validation failed');
+  }
+
+  // Log non-blocking errors in development
+  if (errors.length > 0 && !config.isProduction) {
+    console.warn('\n⚠️  Security configuration issues (non-blocking in development):');
+    errors.forEach((e) => console.warn(`   ⚠️  ${e}`));
+    console.warn('');
   }
 }
 

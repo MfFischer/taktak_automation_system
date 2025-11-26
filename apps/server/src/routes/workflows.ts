@@ -7,11 +7,15 @@ import Joi from 'joi';
 
 import { asyncHandler } from '../middleware/errorHandler';
 import { validateBody, validateParams, validateQuery } from '../middleware/validation';
+import { authenticateToken } from '../middleware/auth';
+import { checkExecutionLimit, checkWorkflowLimit } from '../middleware/usageLimits';
 import { WorkflowService } from '../services/workflowService';
+import { AuthService } from '../services/authService';
 import { WorkflowStatus, NodeType } from '@taktak/types';
 
 const router = Router();
 const workflowService = new WorkflowService();
+const authService = new AuthService();
 
 // Validation schemas
 const createWorkflowSchema = Joi.object({
@@ -191,9 +195,16 @@ router.delete(
  */
 router.post(
   '/:id/execute',
+  authenticateToken,
+  checkExecutionLimit,
   validateParams(idParamSchema),
   asyncHandler(async (req: Request, res: Response) => {
     const execution = await workflowService.executeWorkflow(req.params.id, req.body);
+
+    // Increment execution count for user
+    if (req.user) {
+      await authService.incrementExecutionCount(req.user.id);
+    }
 
     res.json({
       success: true,
@@ -208,6 +219,7 @@ router.post(
  */
 router.patch(
   '/:id/status',
+  authenticateToken,
   validateParams(idParamSchema),
   validateBody(
     Joi.object({
@@ -217,11 +229,102 @@ router.patch(
     })
   ),
   asyncHandler(async (req: Request, res: Response) => {
-    const workflow = await workflowService.updateWorkflowStatus(req.params.id, req.body.status);
+    const { status } = req.body;
+
+    // Check workflow limit when activating
+    if (status === WorkflowStatus.ACTIVE && req.user) {
+      await checkWorkflowLimit(req, res, async () => {
+        const workflow = await workflowService.updateWorkflowStatus(req.params.id, status);
+
+        // Update active workflow count
+        const activeWorkflows = await workflowService.countActiveWorkflows(req.user!.id);
+        await authService.updateActiveWorkflowCount(req.user!.id, activeWorkflows);
+
+        res.json({
+          success: true,
+          data: workflow,
+        });
+      });
+    } else {
+      const workflow = await workflowService.updateWorkflowStatus(req.params.id, status);
+
+      // Update active workflow count if deactivating
+      if (req.user && (status === WorkflowStatus.PAUSED || status === WorkflowStatus.DISABLED)) {
+        const activeWorkflows = await workflowService.countActiveWorkflows(req.user.id);
+        await authService.updateActiveWorkflowCount(req.user.id, activeWorkflows);
+      }
+
+      res.json({
+        success: true,
+        data: workflow,
+      });
+    }
+  })
+);
+
+/**
+ * List workflow versions
+ * GET /api/workflows/:id/versions
+ */
+router.get(
+  '/:id/versions',
+  validateParams(idParamSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    const versions = await workflowService.listWorkflowVersions(req.params.id);
+
+    res.json({
+      success: true,
+      data: versions,
+    });
+  })
+);
+
+/**
+ * Get a specific workflow version
+ * GET /api/workflows/:id/versions/:versionId
+ */
+router.get(
+  '/:id/versions/:versionId',
+  asyncHandler(async (req: Request, res: Response) => {
+    const version = await workflowService.getWorkflowVersion(req.params.versionId);
+
+    res.json({
+      success: true,
+      data: version,
+    });
+  })
+);
+
+/**
+ * Rollback to a specific version
+ * POST /api/workflows/:id/versions/:versionId/rollback
+ */
+router.post(
+  '/:id/versions/:versionId/rollback',
+  asyncHandler(async (req: Request, res: Response) => {
+    const workflow = await workflowService.rollbackToVersion(req.params.id, req.params.versionId);
 
     res.json({
       success: true,
       data: workflow,
+    });
+  })
+);
+
+/**
+ * Create a new version snapshot
+ * POST /api/workflows/:id/versions
+ */
+router.post(
+  '/:id/versions',
+  validateParams(idParamSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { changeDescription } = req.body;
+    const version = await workflowService.createWorkflowVersion(req.params.id, changeDescription);
+
+    res.json({
+      success: true,
+      data: version,
     });
   })
 );

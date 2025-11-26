@@ -32,12 +32,13 @@ Drag-and-drop interface powered by React Flow. Build complex automation workflow
 
 ### 🤖 **4-Tier AI Fallback System** 🆕
 **Enterprise-grade 99.9% uptime** with automatic failover:
-1. **Gemini** (0.8s) - Fastest, best quality
-2. **OpenRouter** (1.2s) - Multiple models fallback
-3. **Phi-3 Local** (1.5s) - Offline, privacy-first
-4. **Queue** - Retry when online
+1. **Gemini** (0.8s) - Fastest, best quality ✅ **READY**
+2. **OpenRouter** (1.2s) - Multiple models fallback ✅ **READY**
+3. **Phi-3 Local** (1.5s) - **Zero-setup, offline, privacy-first** ✅ **READY**
+4. **Queue** - Retry when online ✅ **READY**
 
-*Unlike Zapier/Make, Taktak works even when offline or APIs are down!*
+*Unlike Zapier/Make, Taktak works even when APIs are down!*
+**🎉 NEW: Works immediately without API keys!** Just download the Phi-3 model (2.4GB) and you're ready to go!
 
 </td>
 </tr>
@@ -67,8 +68,8 @@ JWT authentication, encrypted credentials, and secure data handling. Built with 
 </td>
 <td width="50%">
 
-### 🧠 **Local LLM Support** 🆕
-Run AI workflows completely offline with Phi-3 via llama.cpp. No API keys, no internet, no data leaving your machine.
+### 🧠 **Zero-Setup Local AI** ✅ **READY**
+Offline AI with Phi-3 is now available! Download the model (2.4GB) and use AI **without any API keys**. Perfect for privacy-conscious users and offline scenarios.
 
 </td>
 </tr>
@@ -158,54 +159,105 @@ Open [http://localhost:3000](http://localhost:3000) and start automating!
 
 Taktak features a **4-tier AI fallback system** for enterprise-grade reliability:
 
-### Quick Setup
+### 🎉 Zero-Setup Option (NEW!)
 
-1. **Auto Mode (Recommended)** - Set `AI_MODE=auto` in `.env`
-   - Automatically tries all providers in order
-   - Works offline when needed
-   - 99.9% uptime guarantee
+**No API keys needed!** Just download the Phi-3 model and start using AI immediately:
 
-2. **Get API Keys** (Optional but recommended):
-   - **Gemini**: https://makersuite.google.com/app/apikey (Free tier available)
-   - **OpenRouter**: https://openrouter.ai/keys (Pay-as-you-go, $5 minimum)
-
-3. **Download Local Model** (For offline use):
-   ```bash
-   # Download Phi-3 model (~2.4GB)
-   cd apps/server/models
-   # See README.md in that folder for download instructions
+1. **Download Phi-3 Model** (one-time, ~2.4GB):
+   ```powershell
+   # Windows PowerShell (run from apps/server/models directory)
+   Invoke-WebRequest -Uri "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf" -OutFile "phi-3-mini-4k-instruct-q4.gguf"
    ```
+
+   Or download manually from: https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/tree/main
+
+2. **Set AI mode to local** in `.env`:
+   ```env
+   AI_MODE=local
+   ```
+
+3. **Restart backend server** and you're done! 🎉
+
+**Benefits:**
+- ✅ **Zero-setup** - No API keys required
+- ✅ **Works offline** - No internet needed
+- ✅ **Privacy-first** - Data never leaves your machine
+- ✅ **Free forever** - No usage limits or costs
+
+---
+
+### ⚡ Cloud Option (Faster, Optional)
+
+For faster responses, add cloud AI providers:
+
+1. **Get a FREE Gemini API Key** (Recommended for speed):
+   - Visit: https://makersuite.google.com/app/apikey
+   - Sign in with Google account
+   - Click "Create API Key"
+   - Copy the key
+
+2. **Add to `.env` file**:
+   ```env
+   GEMINI_API_KEY=your_key_here
+   AI_MODE=auto
+   ```
+
+3. **Restart backend server** and enjoy faster AI! 🎉
+
+### Optional: Add OpenRouter for Extra Reliability
+
+For even better uptime, add OpenRouter as a second fallback:
+- Get API key: https://openrouter.ai/keys (Pay-as-you-go, $5 minimum)
+- Add to `.env`: `OPENROUTER_API_KEY=your_key_here`
+
+---
 
 ### AI Provider Comparison
 
-| Provider | Speed | Quality | Cost | Offline | Setup |
-|----------|-------|---------|------|---------|-------|
-| **Gemini** | 0.8s | ⭐⭐⭐⭐⭐ | Free tier | ❌ | API key |
-| **OpenRouter** | 1.2s | ⭐⭐⭐⭐ | $0.001/req | ❌ | API key |
-| **Phi-3 Local** | 1.5s | ⭐⭐⭐ | Free | ✅ | Model download |
-| **Queue** | N/A | N/A | Free | ✅ | None |
+| Provider | Speed | Quality | Cost | Status | Setup |
+|----------|-------|---------|------|--------|-------|
+| **Gemini** | 0.8s | ⭐⭐⭐⭐⭐ | Free tier | ✅ **READY** | API key |
+| **OpenRouter** | 1.2s | ⭐⭐⭐⭐ | $0.001/req | ✅ **READY** | API key |
+| **Phi-3 Local** | 1.5s | ⭐⭐⭐ | **Free** | ✅ **READY** | Model download (2.4GB) |
+| **Queue** | N/A | N/A | Free | ✅ **READY** | None |
 
 ### How It Works
 
+**AI Mode: `auto` (Recommended)**
 ```
 User Request
     ↓
 ┌─────────────────────────────────────┐
-│  1. Try Gemini (8s timeout)         │ ← Fastest, best quality
+│  1. Try Gemini (8s timeout)         │ ← Fastest, best quality ✅
 └─────────────────────────────────────┘
-    ↓ (if fails)
+    ↓ (if fails or no API key)
 ┌─────────────────────────────────────┐
-│  2. Try OpenRouter (12s timeout)    │ ← Multiple models
+│  2. Try OpenRouter (12s timeout)    │ ← Multiple models ✅
 └─────────────────────────────────────┘
-    ↓ (if fails)
+    ↓ (if fails or no API key)
 ┌─────────────────────────────────────┐
-│  3. Try Phi-3 Local (15s timeout)   │ ← Offline, privacy-first
+│  3. Try Phi-3 Local (15s timeout)   │ ← Offline, privacy-first ✅
 └─────────────────────────────────────┘
-    ↓ (if fails)
+    ↓ (if fails or no model)
 ┌─────────────────────────────────────┐
-│  4. Queue for later                 │ ← Retry when online
+│  4. Queue for later                 │ ← Retry when online ✅
 └─────────────────────────────────────┘
 ```
+
+**AI Mode: `local` (Zero-Setup)**
+```
+User Request
+    ↓
+┌─────────────────────────────────────┐
+│  Use Phi-3 Local (15s timeout)      │ ← Offline, privacy-first ✅
+└─────────────────────────────────────┘
+    ↓ (if fails)
+┌─────────────────────────────────────┐
+│  Queue for later                    │ ← Retry when model available ✅
+└─────────────────────────────────────┘
+```
+
+**Note:** All 4 tiers are now fully operational! Choose `AI_MODE=auto` for maximum reliability or `AI_MODE=local` for zero-setup offline AI.
 
 ### Features
 

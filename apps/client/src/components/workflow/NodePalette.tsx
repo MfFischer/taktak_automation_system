@@ -10,6 +10,12 @@ import {
   FileText,
   ChevronDown,
   ChevronRight,
+  Repeat,
+  AlertTriangle,
+  Slack,
+  Github,
+  CreditCard,
+  Sheet,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -97,6 +103,53 @@ const nodeCategories: NodeCategory[] = [
         label: 'Condition',
         icon: GitBranch,
         description: 'Branch logic',
+      },
+      {
+        type: NodeType.LOOP,
+        label: 'Loop',
+        icon: Repeat,
+        description: 'Iterate over items',
+      },
+      {
+        type: NodeType.ERROR_TRIGGER,
+        label: 'Error Trigger',
+        icon: AlertTriangle,
+        description: 'Handle errors',
+      },
+    ],
+  },
+  {
+    name: 'Integrations',
+    nodes: [
+      {
+        type: NodeType.SLACK,
+        label: 'Slack',
+        icon: Slack,
+        description: 'Send Slack messages',
+      },
+      {
+        type: NodeType.DISCORD,
+        label: 'Discord',
+        icon: MessageSquare,
+        description: 'Send Discord messages',
+      },
+      {
+        type: NodeType.GITHUB,
+        label: 'GitHub',
+        icon: Github,
+        description: 'GitHub operations',
+      },
+      {
+        type: NodeType.GOOGLE_SHEETS,
+        label: 'Google Sheets',
+        icon: Sheet,
+        description: 'Read/write spreadsheets',
+      },
+      {
+        type: NodeType.STRIPE,
+        label: 'Stripe',
+        icon: CreditCard,
+        description: 'Payment processing',
       },
     ],
   },

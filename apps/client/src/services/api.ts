@@ -138,6 +138,24 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ input }),
       }),
+
+    // Versioning
+    listVersions: (workflowId: string) =>
+      apiRequest(`/api/workflows/${workflowId}/versions`),
+
+    getVersion: (workflowId: string, versionId: string) =>
+      apiRequest(`/api/workflows/${workflowId}/versions/${versionId}`),
+
+    rollbackToVersion: (workflowId: string, versionId: string) =>
+      apiRequest(`/api/workflows/${workflowId}/versions/${versionId}/rollback`, {
+        method: 'POST',
+      }),
+
+    createVersion: (workflowId: string, changeDescription?: string) =>
+      apiRequest(`/api/workflows/${workflowId}/versions`, {
+        method: 'POST',
+        body: JSON.stringify({ changeDescription }),
+      }),
   },
 
   // Executions

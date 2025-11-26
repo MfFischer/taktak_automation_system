@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import {
   User, Key, Cloud, Bell, Shield, Zap,
   Save, Eye, EyeOff, Copy, Check, Mail,
-  MessageSquare, Database, Lock, Sparkles, Brain, Download, Loader2
+  MessageSquare, Database, Lock, Sparkles, Brain, Download, Loader2, Palette
 } from 'lucide-react';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
+import ThemeToggle from '../components/ThemeToggle';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -100,6 +102,7 @@ export default function Settings() {
 
   const tabs = [
     { id: 'profile', name: 'Profile', icon: User },
+    { id: 'appearance', name: 'Appearance', icon: Palette },
     { id: 'api-keys', name: 'API Keys', icon: Key },
     { id: 'ai-settings', name: 'AI Settings', icon: Brain },
     { id: 'cloud-sync', name: 'Cloud Sync', icon: Cloud },
@@ -145,6 +148,45 @@ export default function Settings() {
 
         {/* Content */}
         <div className="lg:col-span-3">
+          {/* Appearance Tab */}
+          {activeTab === 'appearance' && (
+            <div className="card-elevated space-y-6 animate-fade-in-up">
+              <div className="flex items-center space-x-3 pb-6 border-b border-dark-border">
+                <div className="p-3 bg-gradient-taktak rounded-xl shadow-glow">
+                  <Palette className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Appearance Settings</h2>
+                  <p className="text-sm text-gray-400">Customize the look and feel</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <label className="block text-sm font-semibold text-gray-300">Theme</label>
+                  <p className="text-sm text-gray-400 mb-4">
+                    Choose your preferred color scheme or let the system decide
+                  </p>
+                  <ThemeToggle />
+                </div>
+
+                <div className="pt-6 border-t border-dark-border">
+                  <h3 className="text-lg font-semibold text-white mb-4">Keyboard Shortcuts</h3>
+                  <p className="text-sm text-gray-400 mb-4">
+                    Press <kbd className="px-2 py-1 bg-gray-700 rounded text-xs">Ctrl + /</kbd> to view all keyboard shortcuts
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent('showKeyboardShortcuts'))}
+                    className="btn-secondary"
+                  >
+                    View Keyboard Shortcuts
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Profile Tab */}
           {activeTab === 'profile' && (
             <div className="card-elevated space-y-6 animate-fade-in-up">

@@ -126,14 +126,26 @@ router.post(
 
 /**
  * GET /api/lemonsqueezy/products
- * 
+ *
  * Get available products and pricing
+ * Works even without LemonSqueezy config (shows static pricing)
  */
 router.get(
   '/products',
   asyncHandler(async (_req: Request, res: Response) => {
     try {
-      const config = getLemonSqueezyConfig();
+      // Try to get config, but don't fail if not available
+      let desktopVariantId = '';
+      let cloudSyncVariantId = '';
+
+      try {
+        const config = getLemonSqueezyConfig();
+        desktopVariantId = config.desktopVariantId;
+        cloudSyncVariantId = config.cloudSyncVariantId;
+      } catch {
+        // LemonSqueezy not configured - use static pricing
+        logger.info('LemonSqueezy not configured, using static pricing');
+      }
 
       const products = [
         {
@@ -144,7 +156,7 @@ router.get(
           priceAmount: 2900,
           currency: 'USD',
           type: 'one-time',
-          variantId: config.desktopVariantId,
+          variantId: desktopVariantId || 'static_desktop',
           features: [
             'Offline-first workflow automation',
             'Visual workflow builder',
@@ -165,7 +177,7 @@ router.get(
           priceAmount: 500,
           currency: 'USD',
           type: 'subscription',
-          variantId: config.cloudSyncVariantId,
+          variantId: cloudSyncVariantId || 'static_cloud',
           features: [
             'Everything in Desktop',
             'Cloud backup & sync',

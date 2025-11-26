@@ -30,27 +30,46 @@ export class DatabaseQueryNodeHandler implements NodeHandler {
         ...config.query,
       };
 
+      // Fetch without sort to avoid index issues
       const result = await this.db.find({
         selector,
-        sort: config.sort ? [config.sort as any] : undefined,
         limit: config.limit,
         skip: config.skip,
       }) as any;
 
+      // Sort in memory if sort is specified
+      let docs = result.docs;
+      if (config.sort) {
+        const sortField = Object.keys(config.sort)[0];
+        const sortOrder = (config.sort as any)[sortField];
+
+        docs = docs.sort((a: any, b: any) => {
+          const aVal = a[sortField];
+          const bVal = b[sortField];
+
+          if (aVal === bVal) return 0;
+          if (aVal === undefined) return 1;
+          if (bVal === undefined) return -1;
+
+          const comparison = aVal < bVal ? -1 : 1;
+          return sortOrder === 'desc' ? -comparison : comparison;
+        });
+      }
+
       logger.info('Database query completed', {
         nodeId: node.id,
-        resultCount: result.docs.length,
+        resultCount: docs.length,
       });
 
       if (config.operation === 'findOne') {
-        return result.docs[0] || null;
+        return docs[0] || null;
       }
 
       if (config.operation === 'count') {
-        return { count: result.docs.length };
+        return { count: docs.length };
       }
 
-      return result.docs;
+      return docs;
     } catch (error) {
       logger.error('Database query failed', {
         nodeId: node.id,

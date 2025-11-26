@@ -11,8 +11,13 @@ import { WorkflowExecutionError } from '../utils/errors';
 import { NodeExecutor } from './nodeExecutor';
 
 export class WorkflowEngine {
-  private db = getLocalDatabase();
+  private db: PouchDB.Database;
   private nodeExecutor = new NodeExecutor();
+
+  constructor(database?: PouchDB.Database) {
+    // Use provided database or get the default local database
+    this.db = database || getLocalDatabase();
+  }
 
   /**
    * Executes a workflow
@@ -35,7 +40,8 @@ export class WorkflowEngine {
 
     try {
       // Save initial execution
-      await this.db.put(execution);
+      const saveResult = await this.db.put(execution);
+      execution._rev = saveResult.rev; // Update _rev for future updates
       logWorkflowExecution(workflow._id, executionId, 'started');
 
       this.addLog(execution, 'info', 'Workflow execution started');
@@ -73,14 +79,23 @@ export class WorkflowEngine {
       });
     }
 
-    // Save final execution state
-    await this.db.put(execution);
+    // Save final execution state with updated _rev
+    try {
+      const finalSaveResult = await this.db.put(execution);
+      execution._rev = finalSaveResult.rev;
+    } catch (error) {
+      // If save fails, log but don't throw - execution already completed
+      logger.warn('Failed to save final execution state', {
+        executionId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
 
     return execution;
   }
 
   /**
-   * Executes a single node
+   * Executes a single node with retry and error handling support
    */
   private async executeNode(
     workflow: Workflow,
@@ -91,52 +106,184 @@ export class WorkflowEngine {
     this.addLog(execution, 'info', `Executing node: ${node.name}`, node.id);
     logNodeExecution(workflow._id, execution._id, node.id, node.type, 'started');
 
-    try {
-      // Execute node
-      const result = await this.nodeExecutor.execute(node, context);
+    // Get execution configuration
+    const execConfig = node.executionConfig || {};
+    const maxRetries = execConfig.retries || 0;
+    const retryDelay = execConfig.retryDelay || 1000;
+    const timeout = execConfig.timeout || 30000;
+    const continueOnError = execConfig.continueOnError || false;
 
-      // Store result in context
-      context.variables[node.id] = result;
+    let lastError: Error | null = null;
+    let attempt = 0;
 
-      this.addLog(execution, 'info', `Node completed: ${node.name}`, node.id);
-      logNodeExecution(workflow._id, execution._id, node.id, node.type, 'completed');
+    // Retry loop
+    while (attempt <= maxRetries) {
+      try {
+        // Execute with timeout
+        const result = await this.executeWithTimeout(
+          () => this.nodeExecutor.execute(node, context),
+          timeout,
+          node.name
+        );
 
-      // Find and execute next nodes
-      const nextConnections = workflow.connections.filter((conn) => conn.from === node.id);
+        // Store result in context
+        context.variables[node.id] = result;
 
-      for (const conn of nextConnections) {
-        // Check condition if present
-        if (conn.condition) {
-          const conditionMet = this.evaluateCondition(conn.condition, context);
-          if (!conditionMet) {
-            this.addLog(execution, 'info', `Skipping connection due to condition: ${conn.condition}`);
-            continue;
-          }
-        }
+        this.addLog(execution, 'info', `Node completed: ${node.name}`, node.id);
+        logNodeExecution(workflow._id, execution._id, node.id, node.type, 'completed');
 
-        // Find next node
-        const nextNode = workflow.nodes.find((n) => n.id === conn.to);
-        if (nextNode) {
-          await this.executeNode(workflow, nextNode, execution, context);
+        // Find and execute next nodes
+        await this.executeNextNodes(workflow, node, execution, context);
+
+        return; // Success, exit retry loop
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Unknown error');
+        attempt++;
+
+        if (attempt <= maxRetries) {
+          this.addLog(
+            execution,
+            'warn',
+            `Node failed (attempt ${attempt}/${maxRetries + 1}), retrying in ${retryDelay}ms...`,
+            node.id
+          );
+          await this.delay(retryDelay);
         }
       }
-    } catch (error) {
-      this.addLog(
-        execution,
-        'error',
-        `Node failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        node.id
-      );
-      logNodeExecution(workflow._id, execution._id, node.id, node.type, 'failed', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
-
-      throw new WorkflowExecutionError(
-        `Node execution failed: ${node.name}`,
-        workflow._id,
-        node.id
-      );
     }
+
+    // All retries exhausted
+    this.addLog(
+      execution,
+      'error',
+      `Node failed after ${maxRetries + 1} attempts: ${lastError?.message}`,
+      node.id
+    );
+    logNodeExecution(workflow._id, execution._id, node.id, node.type, 'failed', {
+      error: lastError?.message,
+      attempts: maxRetries + 1,
+    });
+
+    // Check if we should continue despite error
+    if (continueOnError) {
+      this.addLog(execution, 'warn', `Continuing workflow despite node failure`, node.id);
+
+      // Store error in context for error trigger nodes
+      context.variables.$error = lastError;
+      context.variables.$failedNode = node;
+
+      // Trigger error handlers
+      await this.triggerErrorHandlers(workflow, node, lastError!, execution, context);
+
+      // Continue to next nodes
+      await this.executeNextNodes(workflow, node, execution, context);
+      return;
+    }
+
+    // Trigger error handlers before throwing
+    await this.triggerErrorHandlers(workflow, node, lastError!, execution, context);
+
+    throw new WorkflowExecutionError(
+      `Node execution failed: ${node.name}`,
+      workflow._id,
+      node.id
+    );
+  }
+
+  /**
+   * Executes next nodes in the workflow
+   */
+  private async executeNextNodes(
+    workflow: Workflow,
+    node: Workflow['nodes'][0],
+    execution: WorkflowExecution,
+    context: { input: Record<string, unknown>; variables: Record<string, unknown> }
+  ): Promise<void> {
+    const nextConnections = workflow.connections.filter((conn) => conn.from === node.id);
+
+    for (const conn of nextConnections) {
+      // Check condition if present
+      if (conn.condition) {
+        const conditionMet = this.evaluateCondition(conn.condition, context);
+        if (!conditionMet) {
+          this.addLog(execution, 'info', `Skipping connection due to condition: ${conn.condition}`);
+          continue;
+        }
+      }
+
+      // Find next node
+      const nextNode = workflow.nodes.find((n) => n.id === conn.to);
+      if (nextNode) {
+        await this.executeNode(workflow, nextNode, execution, context);
+      }
+    }
+  }
+
+  /**
+   * Triggers error handler nodes
+   */
+  private async triggerErrorHandlers(
+    workflow: Workflow,
+    failedNode: Workflow['nodes'][0],
+    error: Error,
+    execution: WorkflowExecution,
+    context: { input: Record<string, unknown>; variables: Record<string, unknown> }
+  ): Promise<void> {
+    // Find error trigger nodes
+    const errorTriggers = workflow.nodes.filter((n) => n.type === 'error_trigger');
+
+    if (errorTriggers.length === 0) {
+      return;
+    }
+
+    // Create error context
+    const errorContext = {
+      ...context,
+      variables: {
+        ...context.variables,
+        $error: error,
+        $failedNode: failedNode,
+        $workflowId: workflow._id,
+        $executionId: execution._id,
+      },
+    };
+
+    // Execute error trigger nodes
+    for (const errorTrigger of errorTriggers) {
+      try {
+        await this.nodeExecutor.execute(errorTrigger, errorContext);
+        this.addLog(execution, 'info', `Error trigger executed: ${errorTrigger.name}`);
+      } catch (triggerError) {
+        this.addLog(
+          execution,
+          'error',
+          `Error trigger failed: ${triggerError instanceof Error ? triggerError.message : 'Unknown error'}`
+        );
+      }
+    }
+  }
+
+  /**
+   * Executes a function with timeout
+   */
+  private async executeWithTimeout<T>(
+    fn: () => Promise<T>,
+    timeoutMs: number,
+    nodeName: string
+  ): Promise<T> {
+    return Promise.race([
+      fn(),
+      new Promise<T>((_, reject) =>
+        setTimeout(() => reject(new Error(`Node execution timeout: ${nodeName}`)), timeoutMs)
+      ),
+    ]);
+  }
+
+  /**
+   * Delays execution
+   */
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**

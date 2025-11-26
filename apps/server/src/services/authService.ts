@@ -10,6 +10,19 @@ import { logger } from '../utils/logger';
 import { AuthenticationError, ConflictError, NotFoundError } from '../utils/errors';
 import { generateToken, AuthUser } from '../middleware/auth';
 
+export enum UserTier {
+  FREE = 'free',
+  STARTER = 'starter',
+  PRO = 'pro',
+  ENTERPRISE = 'enterprise',
+}
+
+export interface UsageStats {
+  executionsThisMonth: number;
+  executionsLastReset: string;
+  activeWorkflows: number;
+}
+
 interface User {
   _id: string;
   _rev?: string;
@@ -17,6 +30,8 @@ interface User {
   email: string;
   name: string;
   passwordHash: string;
+  tier?: UserTier;
+  usageStats?: UsageStats;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,13 +54,19 @@ export class AuthService {
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user with FREE tier by default
     const user: User = {
       _id: `user_${uuidv4()}`,
       type: 'user',
       email,
       name,
       passwordHash,
+      tier: UserTier.FREE,
+      usageStats: {
+        executionsThisMonth: 0,
+        executionsLastReset: new Date().toISOString(),
+        activeWorkflows: 0,
+      },
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -58,6 +79,12 @@ export class AuthService {
       id: user._id,
       email: user.email,
       name: user.name,
+      tier: user.tier || UserTier.FREE,
+      usageStats: user.usageStats || {
+        executionsThisMonth: 0,
+        executionsLastReset: new Date().toISOString(),
+        activeWorkflows: 0,
+      },
     };
 
     const token = generateToken(authUser);
@@ -90,6 +117,12 @@ export class AuthService {
       id: user._id,
       email: user.email,
       name: user.name,
+      tier: user.tier || UserTier.FREE,
+      usageStats: user.usageStats || {
+        executionsThisMonth: 0,
+        executionsLastReset: new Date().toISOString(),
+        activeWorkflows: 0,
+      },
     };
 
     const token = generateToken(authUser);
@@ -112,6 +145,12 @@ export class AuthService {
         id: user._id,
         email: user.email,
         name: user.name,
+        tier: user.tier || UserTier.FREE,
+        usageStats: user.usageStats || {
+          executionsThisMonth: 0,
+          executionsLastReset: new Date().toISOString(),
+          activeWorkflows: 0,
+        },
       };
     } catch (error) {
       if ((error as { status?: number }).status === 404) {
@@ -157,7 +196,112 @@ export class AuthService {
       id: updatedUser._id,
       email: updatedUser.email,
       name: updatedUser.name,
+      tier: updatedUser.tier || UserTier.FREE,
+      usageStats: updatedUser.usageStats || {
+        executionsThisMonth: 0,
+        executionsLastReset: new Date().toISOString(),
+        activeWorkflows: 0,
+      },
     };
+  }
+
+  /**
+   * Update user tier (for upgrades/downgrades)
+   */
+  async updateUserTier(userId: string, tier: UserTier): Promise<AuthUser> {
+    logger.info('Updating user tier', { userId, tier });
+
+    const user = await this.db.get<User>(userId);
+
+    if (user.type !== 'user') {
+      throw new NotFoundError('User not found');
+    }
+
+    const updatedUser: User = {
+      ...user,
+      tier,
+      updatedAt: new Date(),
+    };
+
+    await this.db.put(updatedUser);
+
+    logger.info('User tier updated', { userId, tier });
+
+    return {
+      id: updatedUser._id,
+      email: updatedUser.email,
+      name: updatedUser.name,
+      tier: updatedUser.tier || UserTier.FREE,
+      usageStats: updatedUser.usageStats || {
+        executionsThisMonth: 0,
+        executionsLastReset: new Date().toISOString(),
+        activeWorkflows: 0,
+      },
+    };
+  }
+
+  /**
+   * Increment execution count for user
+   */
+  async incrementExecutionCount(userId: string): Promise<void> {
+    const user = await this.db.get<User>(userId);
+
+    if (user.type !== 'user') {
+      throw new NotFoundError('User not found');
+    }
+
+    // Initialize usageStats if undefined
+    const usageStats = user.usageStats || {
+      executionsThisMonth: 0,
+      executionsLastReset: new Date().toISOString(),
+      activeWorkflows: 0,
+    };
+
+    // Check if we need to reset monthly counter
+    const lastReset = new Date(usageStats.executionsLastReset);
+    const now = new Date();
+    const shouldReset = now.getMonth() !== lastReset.getMonth() || now.getFullYear() !== lastReset.getFullYear();
+
+    const updatedUser: User = {
+      ...user,
+      usageStats: {
+        ...usageStats,
+        executionsThisMonth: shouldReset ? 1 : usageStats.executionsThisMonth + 1,
+        executionsLastReset: shouldReset ? now.toISOString() : usageStats.executionsLastReset,
+      },
+      updatedAt: new Date(),
+    };
+
+    await this.db.put(updatedUser);
+  }
+
+  /**
+   * Update active workflow count
+   */
+  async updateActiveWorkflowCount(userId: string, count: number): Promise<void> {
+    const user = await this.db.get<User>(userId);
+
+    if (user.type !== 'user') {
+      throw new NotFoundError('User not found');
+    }
+
+    // Initialize usageStats if undefined
+    const usageStats = user.usageStats || {
+      executionsThisMonth: 0,
+      executionsLastReset: new Date().toISOString(),
+      activeWorkflows: 0,
+    };
+
+    const updatedUser: User = {
+      ...user,
+      usageStats: {
+        ...usageStats,
+        activeWorkflows: count,
+      },
+      updatedAt: new Date(),
+    };
+
+    await this.db.put(updatedUser);
   }
 
   /**

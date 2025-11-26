@@ -1,0 +1,439 @@
+openapi: 3.0.3
+info:
+  title: Taktak Workflow Automation API
+  description: |
+    Professional workflow automation platform with advanced features:
+    - Workflow versioning and rollback
+    - Loop/iteration support
+    - Advanced error handling and retry logic
+    - Integration nodes (Slack, Discord, GitHub, etc.)
+  version: 2.0.0
+  contact:
+    name: Taktak Support
+    url: https://github.com/MfFischer/taktak
+
+servers:
+  - url: http://localhost:3001/api
+    description: Local development server
+  - url: https://api.taktak.app
+    description: Production server
+
+tags:
+  - name: Workflows
+    description: Workflow management operations
+  - name: Versions
+    description: Workflow version control
+  - name: Executions
+    description: Workflow execution management
+  - name: Nodes
+    description: Node configuration and management
+
+paths:
+  /workflows:
+    get:
+      tags: [Workflows]
+      summary: List all workflows
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, active, paused, archived]
+      responses:
+        '200':
+          description: List of workflows
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Workflow'
+
+    post:
+      tags: [Workflows]
+      summary: Create a new workflow
+      description: Creates a new workflow with version 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowCreate'
+      responses:
+        '201':
+          description: Workflow created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+
+  /workflows/{workflowId}:
+    get:
+      tags: [Workflows]
+      summary: Get workflow by ID
+      parameters:
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Workflow details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+
+    put:
+      tags: [Workflows]
+      summary: Update workflow
+      description: Updates workflow and creates new version if significant changes detected
+      parameters:
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowUpdate'
+      responses:
+        '200':
+          description: Workflow updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+
+  /workflows/{workflowId}/versions:
+    get:
+      tags: [Versions]
+      summary: List workflow versions
+      description: Get all versions of a workflow
+      parameters:
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of versions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WorkflowVersion'
+
+    post:
+      tags: [Versions]
+      summary: Create workflow version
+      description: Manually create a version snapshot
+      parameters:
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                changeDescription:
+                  type: string
+                  example: "Added error handling"
+      responses:
+        '201':
+          description: Version created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowVersion'
+
+components:
+  schemas:
+    Workflow:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "workflow:abc123"
+        type:
+          type: string
+          enum: [workflow]
+        name:
+          type: string
+          example: "Order Processing"
+        description:
+          type: string
+        status:
+          type: string
+          enum: [draft, active, paused, archived]
+        version:
+          type: integer
+          example: 3
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowNode'
+        connections:
+          type: array
+          items:
+            $ref: '#/components/schemas/Connection'
+        trigger:
+          $ref: '#/components/schemas/WorkflowNode'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    WorkflowNode:
+      type: object
+      required: [id, type, name, config]
+      properties:
+        id:
+          type: string
+          example: "node-1"
+        type:
+          type: string
+          enum: [webhook, schedule, http_request, slack, discord, loop, error_trigger]
+        name:
+          type: string
+          example: "Send Slack Message"
+        config:
+          type: object
+          description: Node-specific configuration
+        executionConfig:
+          $ref: '#/components/schemas/NodeExecutionConfig'
+
+    NodeExecutionConfig:
+      type: object
+      description: Advanced execution configuration for retry, timeout, and error handling
+      properties:
+        retries:
+          type: integer
+          minimum: 0
+          maximum: 10
+          default: 0
+          description: Number of retry attempts
+        retryDelay:
+          type: integer
+          minimum: 100
+          default: 1000
+          description: Delay between retries in milliseconds
+        timeout:
+          type: integer
+          minimum: 1000
+          default: 30000
+          description: Execution timeout in milliseconds
+        continueOnError:
+          type: boolean
+          default: false
+          description: Continue workflow even if this node fails
+        parallel:
+          type: boolean
+          default: false
+          description: Can execute in parallel with sibling nodes
+
+    Connection:
+      type: object
+      properties:
+        from:
+          type: string
+          example: "node-1"
+        to:
+          type: string
+          example: "node-2"
+        condition:
+          type: string
+          example: "{{$json.status}} === 'success'"
+
+    WorkflowVersion:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "workflow_version:abc123:2:1234567890"
+        type:
+          type: string
+          enum: [workflow_version]
+        workflowId:
+          type: string
+        version:
+          type: integer
+          example: 2
+        snapshot:
+          $ref: '#/components/schemas/Workflow'
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        changeDescription:
+          type: string
+          example: "Added error handling nodes"
+
+    WorkflowExecution:
+      type: object
+      properties:
+        _id:
+          type: string
+        workflowId:
+          type: string
+        status:
+          type: string
+          enum: [running, success, failed, cancelled]
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        logs:
+          type: array
+          items:
+            type: object
+            properties:
+              level:
+                type: string
+                enum: [info, warn, error]
+              message:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+              nodeId:
+                type: string
+
+    WorkflowCreate:
+      type: object
+      required: [name, nodes, connections, trigger]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [draft, active]
+          default: draft
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowNode'
+        connections:
+          type: array
+          items:
+            $ref: '#/components/schemas/Connection'
+        trigger:
+          $ref: '#/components/schemas/WorkflowNode'
+
+    WorkflowUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowNode'
+        connections:
+          type: array
+          items:
+            $ref: '#/components/schemas/Connection'
+
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                changeDescription:
+                  type: string
+                  example: "Added error handling"
+      responses:
+        '201':
+          description: Version created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowVersion'
+
+  /workflows/{workflowId}/versions/{versionId}/rollback:
+    post:
+      tags: [Versions]
+      summary: Rollback to version
+      description: Restore workflow to a previous version (creates backup first)
+      parameters:
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: versionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Workflow rolled back
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+
+  /workflows/{workflowId}/execute:
+    post:
+      tags: [Executions]
+      summary: Execute workflow
+      parameters:
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                input:
+                  type: object
+                  description: Input data for workflow
+      responses:
+        '200':
+          description: Execution started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowExecution'
+

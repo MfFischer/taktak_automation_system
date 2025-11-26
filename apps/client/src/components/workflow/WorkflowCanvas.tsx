@@ -6,11 +6,11 @@ import ReactFlow, {
   addEdge,
   useNodesState,
   useEdgesState,
-  Controls,
   Background,
   BackgroundVariant,
   MiniMap,
   Panel,
+  ReactFlowProvider,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Save, Play } from 'lucide-react';
@@ -20,6 +20,8 @@ import { NodeType } from '@taktak/types';
 import CustomNode from './CustomNode';
 import NodePalette from './NodePalette';
 import NodeConfigPanel from './NodeConfigPanel';
+import WorkflowControls from './WorkflowControls';
+import NodeSearch from './NodeSearch';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -44,6 +46,7 @@ export default function WorkflowCanvas({
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [showConfigPanel, setShowConfigPanel] = useState(false);
+  const [showMinimap, setShowMinimap] = useState(true);
 
   // Update nodes when initialNodes change
   useEffect(() => {
@@ -147,13 +150,14 @@ export default function WorkflowCanvas({
   }, [selectedNode, setNodes, setEdges]);
 
   return (
-    <div className="h-full w-full flex">
-      {/* Node Palette */}
-      <NodePalette onAddNode={handleAddNode} />
+    <ReactFlowProvider>
+      <div className="h-full w-full flex">
+        {/* Node Palette */}
+        <NodePalette onAddNode={handleAddNode} />
 
-      {/* Canvas */}
-      <div className="flex-1 relative">
-        <ReactFlow
+        {/* Canvas */}
+        <div className="flex-1 relative">
+          <ReactFlow
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
@@ -167,22 +171,36 @@ export default function WorkflowCanvas({
           className="bg-gray-50 dark:bg-gray-900"
         >
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-          <Controls />
-          <MiniMap
-            nodeColor={(node) => {
-              const nodeType = node.data.nodeType as NodeType;
-              if (nodeType === NodeType.SCHEDULE) return '#10b981';
-              if (nodeType === NodeType.SEND_SMS || nodeType === NodeType.SEND_EMAIL)
-                return '#3b82f6';
-              if (nodeType === NodeType.CONDITION) return '#f59e0b';
-              if (nodeType === NodeType.AI_GENERATE) return '#8b5cf6';
-              return '#6b7280';
-            }}
+
+          {/* Node Search */}
+          <NodeSearch nodes={nodes} />
+
+          {/* Workflow Controls (Zoom, Minimap Toggle) */}
+          <WorkflowControls
+            showMinimap={showMinimap}
+            onToggleMinimap={() => setShowMinimap(!showMinimap)}
           />
+
+          {/* Minimap (conditionally rendered) */}
+          {showMinimap && (
+            <MiniMap
+              nodeColor={(node) => {
+                const nodeType = node.data.nodeType as NodeType;
+                if (nodeType === NodeType.SCHEDULE) return '#10b981';
+                if (nodeType === NodeType.SEND_SMS || nodeType === NodeType.SEND_EMAIL)
+                  return '#3b82f6';
+                if (nodeType === NodeType.CONDITION) return '#f59e0b';
+                if (nodeType === NodeType.AI_GENERATE) return '#8b5cf6';
+                return '#6b7280';
+              }}
+              position="bottom-left"
+            />
+          )}
 
           {/* Action Panel */}
           <Panel position="top-right" className="flex gap-2">
             <button
+              type="button"
               onClick={handleSave}
               className="btn btn-primary flex items-center gap-2"
               disabled={!onSave}
@@ -191,6 +209,7 @@ export default function WorkflowCanvas({
               Save
             </button>
             <button
+              type="button"
               onClick={handleExecute}
               className="btn btn-secondary flex items-center gap-2"
               disabled={!onExecute}
@@ -235,7 +254,8 @@ export default function WorkflowCanvas({
           onUpdate={handleUpdateNodeConfig}
         />
       )}
-    </div>
+      </div>
+    </ReactFlowProvider>
   );
 }
 
