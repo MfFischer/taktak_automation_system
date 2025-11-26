@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight, Sparkles,
   Workflow, Bot, Cloud, Lock, Mail, LogIn,
-  Loader2, Github, Twitter, Linkedin,
+  Loader2, Twitter, Linkedin,
   Zap, Shield, Clock, Server, Cpu, Globe,
   FileSpreadsheet, MessageSquare, Calendar, CreditCard,
   Play, CheckCircle2, ChevronRight, Star,
-  Database, Bell, Users, ShoppingCart, FileText, BarChart3
+  Database, Bell, Users, ShoppingCart, FileText, BarChart3,
+  Monitor, Download, Filter, Search, ExternalLink, Laptop
 } from 'lucide-react';
 
 export default function Home() {
@@ -16,6 +17,8 @@ export default function Home() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [workflowSearch, setWorkflowSearch] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,6 +173,18 @@ export default function Home() {
     },
   ];
 
+  // Workflow categories
+  const workflowCategories = ['All', 'Sales', 'Marketing', 'Support', 'Finance', 'HR', 'IT Ops', 'E-commerce', 'Analytics', 'Legal'];
+
+  // Filter workflows
+  const filteredWorkflows = sampleWorkflows.filter(workflow => {
+    const matchesCategory = selectedCategory === 'All' || workflow.category === selectedCategory;
+    const matchesSearch = workflowSearch === '' ||
+      workflow.name.toLowerCase().includes(workflowSearch.toLowerCase()) ||
+      workflow.description.toLowerCase().includes(workflowSearch.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
   // 4-Tier AI Failover system
   const aiTiers = [
     {
@@ -236,16 +251,9 @@ export default function Home() {
             </div>
 
             {/* Nav Links */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-6">
               <a href="#features" className="text-gray-300 hover:text-white transition-colors duration-300">Features</a>
               <a href="#workflows" className="text-gray-300 hover:text-white transition-colors duration-300">Templates</a>
-              <button
-                type="button"
-                onClick={() => navigate('/desktop')}
-                className="text-gray-300 hover:text-white transition-colors duration-300"
-              >
-                Desktop App
-              </button>
               <button
                 type="button"
                 onClick={() => navigate('/pricing')}
@@ -253,13 +261,20 @@ export default function Home() {
               >
                 Pricing
               </button>
-              <a href="https://github.com/MfFischer/taktak#readme" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors duration-300">Docs</a>
+              <button
+                type="button"
+                onClick={() => navigate('/desktop')}
+                className="btn btn-secondary flex items-center space-x-2"
+              >
+                <Monitor className="w-4 h-4" />
+                <span>Desktop App</span>
+              </button>
               <button
                 type="button"
                 onClick={() => navigate('/signup')}
-                className="btn btn-ghost"
+                className="btn btn-primary"
               >
-                Sign Up
+                Get Started
               </button>
             </div>
           </div>
@@ -529,7 +544,7 @@ export default function Home() {
                     { feature: 'Local AI (No API)', taktak: true, zapier: false, make: false, n8n: false },
                     { feature: 'Desktop App', taktak: true, zapier: false, make: false, n8n: false },
                     { feature: 'Self-Hostable', taktak: true, zapier: false, make: false, n8n: true },
-                    { feature: 'Open Source', taktak: true, zapier: false, make: false, n8n: true },
+                    { feature: '99.9% Uptime SLA', taktak: true, zapier: false, make: false, n8n: false },
                   ].map((row, i) => (
                     <tr key={i} className="hover:bg-dark-surface/50">
                       <td className="px-6 py-4 text-sm text-gray-300">{row.feature}</td>
@@ -572,56 +587,121 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Sample Workflows Section */}
+      {/* Interactive Workflow Explorer Section - Like n8n */}
       <section id="workflows" className="relative z-10 py-32 px-6 border-t border-dark-border">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 animate-fade-in-up">
+          <div className="text-center mb-12 animate-fade-in-up">
             <h2 className="text-5xl font-bold text-white mb-6">
-              Ready-to-Use <span className="text-gradient">Workflows</span>
+              Explore <span className="text-gradient">Workflow Templates</span>
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Start automating in minutes with our pre-built templates. No coding required.
+              Browse our library of pre-built automation templates. Click any template to preview it instantly.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {sampleWorkflows.map((workflow) => (
+          {/* Search and Filter Bar */}
+          <div className="flex flex-col md:flex-row gap-4 mb-8">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Search workflows..."
+                value={workflowSearch}
+                onChange={(e) => setWorkflowSearch(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-dark-surface border border-dark-border rounded-xl text-white placeholder-gray-500 focus:border-taktak-500 focus:ring-1 focus:ring-taktak-500 transition-all"
+              />
+            </div>
+
+            {/* Category Filter */}
+            <div className="flex items-center space-x-2 overflow-x-auto pb-2 md:pb-0">
+              <Filter className="w-5 h-5 text-gray-500 flex-shrink-0" />
+              {workflowCategories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                    selectedCategory === category
+                      ? 'bg-taktak-500 text-white'
+                      : 'bg-dark-surface text-gray-400 hover:text-white hover:bg-dark-border'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Workflow Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+            {filteredWorkflows.map((workflow) => (
               <div
                 key={workflow.id}
-                className="card-interactive group cursor-pointer"
+                className="card-interactive group cursor-pointer hover:border-taktak-500/50"
                 onClick={() => navigate(`/templates/${workflow.id}/preview`)}
               >
-                <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${workflow.color} mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
-                  <workflow.icon className="w-7 h-7 text-white" />
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${workflow.color} shadow-lg group-hover:scale-110 transition-transform`}>
+                    <workflow.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="px-2 py-1 bg-dark-surface text-xs text-taktak-400 rounded-full font-medium">
+                    {workflow.category}
+                  </span>
                 </div>
-                <div className="text-xs text-taktak-400 font-medium mb-2">{workflow.category}</div>
-                <h3 className="text-lg font-bold text-white mb-2">{workflow.name}</h3>
-                <p className="text-sm text-gray-400 mb-4">{workflow.description}</p>
 
-                {/* Workflow nodes preview */}
-                <div className="flex flex-wrap gap-1 mb-4">
+                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-taktak-300 transition-colors">
+                  {workflow.name}
+                </h3>
+                <p className="text-sm text-gray-400 mb-4 line-clamp-2">{workflow.description}</p>
+
+                {/* Workflow Flow Preview */}
+                <div className="flex items-center space-x-1 mb-4 overflow-hidden">
                   {workflow.nodes.map((node, i) => (
-                    <span key={i} className="px-2 py-1 bg-dark-surface text-xs text-gray-400 rounded">
-                      {node}
-                    </span>
+                    <div key={i} className="flex items-center">
+                      <span className="px-2 py-1 bg-dark-bg text-xs text-gray-300 rounded border border-dark-border whitespace-nowrap">
+                        {node}
+                      </span>
+                      {i < workflow.nodes.length - 1 && (
+                        <ChevronRight className="w-3 h-3 text-gray-600 mx-1 flex-shrink-0" />
+                      )}
+                    </div>
                   ))}
                 </div>
 
-                <button className="flex items-center text-taktak-400 text-sm font-medium group-hover:text-taktak-300">
-                  <Play className="w-4 h-4 mr-1" />
-                  Preview Workflow
-                  <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                </button>
+                <div className="flex items-center justify-between pt-4 border-t border-dark-border">
+                  <button className="flex items-center text-taktak-400 text-sm font-medium group-hover:text-taktak-300">
+                    <Play className="w-4 h-4 mr-1" />
+                    Preview
+                  </button>
+                  <ExternalLink className="w-4 h-4 text-gray-500 group-hover:text-taktak-400 transition-colors" />
+                </div>
               </div>
             ))}
           </div>
 
-          <div className="text-center">
+          {/* Empty State */}
+          {filteredWorkflows.length === 0 && (
+            <div className="text-center py-16">
+              <Workflow className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">No workflows found</h3>
+              <p className="text-gray-400 mb-4">Try adjusting your search or filter</p>
+              <button
+                onClick={() => { setSelectedCategory('All'); setWorkflowSearch(''); }}
+                className="btn btn-secondary"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
+
+          {/* CTA */}
+          <div className="text-center mt-8">
+            <p className="text-gray-400 mb-4">Want to use these workflows? Get started for free!</p>
             <button
               onClick={() => navigate('/signup')}
               className="btn btn-primary text-lg px-8 py-4 group"
             >
-              <span>Browse All Templates</span>
+              <span>Create Free Account</span>
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
@@ -717,7 +797,7 @@ export default function Home() {
               },
               {
                 question: 'Can I self-host Taktak?',
-                answer: 'Yes! Taktak is open source under the MIT License. You can download the desktop app or deploy it on your own infrastructure for complete control over your data.'
+                answer: 'Yes! With our Pro or Enterprise plans, you can download the desktop app and run everything locally. This gives you complete control over your data and workflows.'
               },
             ].map((faq, index) => (
               <details
@@ -737,15 +817,14 @@ export default function Home() {
 
           <div className="mt-12 text-center">
             <p className="text-gray-400 mb-4">Still have questions?</p>
-            <a
-              href="https://github.com/MfFischer/taktak/issues"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => navigate('/contact')}
               className="btn-secondary inline-flex items-center"
             >
-              Ask on GitHub
+              Contact Support
               <ArrowRight className="w-4 h-4 ml-2" />
-            </a>
+            </button>
           </div>
         </div>
       </section>
@@ -753,23 +832,20 @@ export default function Home() {
       {/* Footer */}
       <footer className="relative z-10 border-t border-dark-border bg-dark-surface/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <img src="/logo.png" alt="Taktak" className="w-8 h-8 object-contain" />
                 <span className="text-xl font-bold text-gradient">Taktak</span>
               </div>
               <p className="text-gray-400 text-sm">
-                Shake off the manual work with AI-powered automation.
+                Shake off the manual work with AI-powered automation that never fails.
               </p>
               <div className="flex items-center space-x-4 pt-4">
-                <a href="https://github.com/MfFischer/taktak_automation_system" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
-                  <Github className="w-5 h-5" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <a href="#" className="text-gray-400 hover:text-white transition-colors" title="Follow us on Twitter" aria-label="Twitter">
                   <Twitter className="w-5 h-5" />
                 </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <a href="#" className="text-gray-400 hover:text-white transition-colors" title="Connect on LinkedIn" aria-label="LinkedIn">
                   <Linkedin className="w-5 h-5" />
                 </a>
               </div>
@@ -779,24 +855,37 @@ export default function Home() {
               <h4 className="font-semibold text-white mb-4">Product</h4>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><button onClick={() => navigate('/signup')} className="hover:text-white transition-colors">Get Started</button></li>
-                <li><a href="https://github.com/MfFischer/taktak_automation_system#readme" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Documentation</a></li>
+                <li><a href="#workflows" className="hover:text-white transition-colors">Templates</a></li>
+                <li><button type="button" onClick={() => navigate('/pricing')} className="hover:text-white transition-colors">Pricing</button></li>
+                <li><button type="button" onClick={() => navigate('/desktop')} className="hover:text-white transition-colors">Desktop App</button></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-white mb-4">Company</h4>
+              <ul className="space-y-2 text-sm text-gray-400">
+                <li><button type="button" onClick={() => navigate('/about')} className="hover:text-white transition-colors">About Us</button></li>
+                <li><button type="button" onClick={() => navigate('/contact')} className="hover:text-white transition-colors">Contact</button></li>
+                <li><button type="button" onClick={() => navigate('/careers')} className="hover:text-white transition-colors">Careers</button></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-semibold text-white mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><button onClick={() => navigate('/privacy')} className="hover:text-white transition-colors">Privacy Policy</button></li>
-                <li><button onClick={() => navigate('/terms')} className="hover:text-white transition-colors">Terms of Service</button></li>
-                <li><button onClick={() => navigate('/cookies')} className="hover:text-white transition-colors">Cookie Policy</button></li>
+                <li><button type="button" onClick={() => navigate('/privacy')} className="hover:text-white transition-colors">Privacy Policy</button></li>
+                <li><button type="button" onClick={() => navigate('/terms')} className="hover:text-white transition-colors">Terms of Service</button></li>
+                <li><button type="button" onClick={() => navigate('/cookies')} className="hover:text-white transition-colors">Cookie Policy</button></li>
               </ul>
             </div>
           </div>
 
           <div className="pt-8 border-t border-dark-border flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-sm text-gray-400">
-              © 2024 Taktak. Open source under MIT License.
+              © 2024 Taktak. All rights reserved.
+            </p>
+            <p className="text-sm text-gray-500">
+              Built with ❤️ for businesses that never sleep
             </p>
           </div>
         </div>
