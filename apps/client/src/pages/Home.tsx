@@ -8,7 +8,7 @@ import {
   FileSpreadsheet, MessageSquare, Calendar, CreditCard,
   Play, CheckCircle2, ChevronRight, Star,
   Database, Bell, Users, ShoppingCart, FileText, BarChart3,
-  Monitor, Download, Filter, Search, ExternalLink, Laptop
+  Monitor, Filter, Search, ExternalLink
 } from 'lucide-react';
 
 export default function Home() {

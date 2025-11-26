@@ -25,7 +25,7 @@
 <td width="50%">
 
 ### 🎨 **Visual Workflow Builder**
-Drag-and-drop interface powered by React Flow. Build complex automation workflows visually with 10+ pre-built nodes including Schedule, AI Generate, Database, SMS, Email, and more.
+Drag-and-drop interface powered by React Flow. Build complex automation workflows visually with **37 nodes** across 11 categories including Triggers, AI, Communication, Google Workspace, Payments, and more.
 
 </td>
 <td width="50%">
@@ -51,11 +51,12 @@ Works without internet using PouchDB local storage. Optional cloud sync to Couch
 </td>
 <td width="50%">
 
-### 📋 **12 Pre-Built Templates** 🆕
-Ready-to-use workflows for:
-- **Clinics**: Appointment reminders, prescription alerts, lab results
-- **Stores**: Inventory alerts, order confirmations, abandoned cart recovery
-- **Cooperatives**: Member onboarding, meeting reminders, payment notifications
+### 📋 **36 Pre-Built Templates** 🆕
+Ready-to-use workflows across 9 categories:
+- **Sales**: Lead Capture, AI Scoring, Follow-ups
+- **Marketing**: Social Scheduler, Email Campaigns
+- **Support**: AI Chat, Ticket Priority
+- **Finance, HR, IT Ops, E-commerce, Analytics, Legal**
 
 </td>
 </tr>
@@ -70,6 +71,20 @@ JWT authentication, encrypted credentials, and secure data handling. Built with 
 
 ### 🧠 **Zero-Setup Local AI** ✅ **READY**
 Offline AI with Phi-3 is now available! Download the model (2.4GB) and use AI **without any API keys**. Perfect for privacy-conscious users and offline scenarios.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 💾 **Auto-Save** 🆕
+Never lose your work! Workflows auto-save every 3 seconds with visual status indicators (Saving, Saved, Unsaved). Toggle on/off as needed.
+
+</td>
+<td width="50%">
+
+### 🖥️ **Desktop App**
+Same powerful platform as an Electron desktop app. Run Taktak locally without a browser for maximum performance and privacy.
 
 </td>
 </tr>
@@ -316,58 +331,146 @@ graph TB
 
 ---
 
-## 📦 Available Workflow Nodes
+## 📦 Available Workflow Nodes (37 Total)
 
-| Node | Description | Use Case |
-|------|-------------|----------|
-| ⏰ **Schedule** | Cron-based triggers | Run workflows at specific times |
-| 🔀 **Condition** | Branching logic | If/else workflow paths |
-| 💾 **Database** | CRUD operations | Store and retrieve data |
-| 📱 **SMS** | Twilio integration | Send text messages |
-| 📧 **Email** | SMTP support | Send email notifications |
-| 🤖 **AI Generate** | Gemini AI | Generate text content |
-| 🔗 **Webhook** | External triggers | Receive HTTP callbacks |
-| 🌐 **HTTP Request** | API calls | Integrate with external services |
-| 📊 **CSV Import/Export** | Data handling | Process CSV files |
+### Triggers
+| Node | Description |
+|------|-------------|
+| ⏰ **Schedule** | Cron-based triggers for timed automation |
+| 🔗 **Webhook** | Receive HTTP callbacks from external services |
+| 👁️ **Database Watch** | Monitor database for changes |
+| 📁 **File Watch** | Trigger on file system changes |
+
+### Actions & Logic
+| Node | Description |
+|------|-------------|
+| 🌐 **HTTP Request** | Make API calls to external services |
+| 💻 **Code** | Execute custom JavaScript/TypeScript |
+| 🔄 **Transform** | Transform data between formats |
+| 🔀 **Condition** | If/else branching logic |
+| 🔀 **Switch** | Multi-way branching |
+| 🔁 **Loop** | Iterate over collections |
+
+### Data
+| Node | Description |
+|------|-------------|
+| 💾 **Database Query** | SQL/NoSQL database operations |
+| 📊 **Spreadsheet** | Read/write spreadsheet data |
+| 📋 **JSON Parse** | Parse and extract JSON data |
+| 📄 **CSV Parse** | Parse CSV files |
+| 📝 **XML Parse** | Parse XML documents |
+| 📁 **File Read** | Read files from disk |
+
+### Communication
+| Node | Description |
+|------|-------------|
+| 📧 **Email** | Send emails via SMTP |
+| 💬 **Slack** | Post messages to Slack |
+| 🎮 **Discord** | Send Discord messages |
+| 📱 **SMS** | Send SMS via Twilio |
+
+### Google Workspace
+| Node | Description |
+|------|-------------|
+| 📧 **Gmail** | Send/read Gmail messages |
+| 📊 **Google Sheets** | Read/write spreadsheets |
+| 📁 **Google Drive** | File operations |
+| 📅 **Google Calendar** | Manage calendar events |
+
+### AI & Machine Learning
+| Node | Description |
+|------|-------------|
+| 🤖 **OpenAI** | GPT models for text generation |
+| 📝 **AI Text** | Text analysis and generation |
+| 🎨 **AI Image** | Image generation |
+| 🏷️ **AI Classify** | Content classification |
+
+### Payments & E-commerce
+| Node | Description |
+|------|-------------|
+| 💳 **Stripe** | Payment processing |
+| 💰 **PayPal** | PayPal transactions |
+| 🛒 **Shopify** | E-commerce operations |
+| 🛍️ **WooCommerce** | WooCommerce integration |
+| 🏪 **Square POS** | Point of sale |
+
+### Development & Productivity
+| Node | Description |
+|------|-------------|
+| 🐙 **GitHub** | Repository operations |
+| 🦊 **GitLab** | CI/CD and repos |
+| 📝 **Notion** | Notion pages and databases |
+| 📋 **Trello** | Board management |
+| 📊 **Airtable** | Database operations |
+| ✅ **Asana** | Task management |
 
 ---
 
-## 📋 Pre-Built Workflow Templates
+## 📋 Pre-Built Workflow Templates (36 Total)
 
-Taktak includes **12 production-ready workflow templates** for common business scenarios:
+Taktak includes **36 production-ready workflow templates** across 9 business categories:
 
-### 🏥 Clinic Templates
+### 💼 Sales (4 Templates)
+| Template | Description |
+|----------|-------------|
+| **Lead Capture** | Automatically capture and store leads from web forms |
+| **AI Lead Scoring** | Score leads using AI based on engagement data |
+| **Sales Follow-up** | Automated follow-up emails after initial contact |
+| **Deal Alerts** | Notify team when deals reach key stages |
 
-| Template | Description | Trigger | Actions |
-|----------|-------------|---------|---------|
-| **Appointment Reminder** | SMS reminders 24h before appointments | Schedule (daily) | Database → Condition → SMS |
-| **Prescription Refill** | Alert patients 3 days before expiration | Schedule (daily) | Database → Condition → SMS |
-| **Lab Results Notification** | Email when results are ready | Database Watch | Database → Email |
-| **Post-Visit Follow-up** | SMS 2 days after visit | Schedule (daily) | Database → Condition → SMS |
+### 📣 Marketing (3 Templates)
+| Template | Description |
+|----------|-------------|
+| **Social Scheduler** | Schedule and post to multiple social platforms |
+| **Email Campaign** | Automated drip email campaigns |
+| **Content Repurposing** | Transform blog posts into social content |
 
-### 🏪 Store Templates
+### 🎧 Support (2 Templates)
+| Template | Description |
+|----------|-------------|
+| **AI Customer Support** | AI-powered first-response to support tickets |
+| **Ticket Auto-Priority** | Automatically prioritize tickets based on keywords |
 
-| Template | Description | Trigger | Actions |
-|----------|-------------|---------|---------|
-| **Low Inventory Alert** | Email when stock is low | Database Watch | Database → Condition → Email |
-| **Order Confirmation** | Automated order confirmations | Webhook | HTTP → Email |
-| **Customer Feedback** | Post-purchase surveys | Schedule (daily) | Database → Condition → Email |
-| **Abandoned Cart Recovery** | Win back lost sales | Schedule (hourly) | Database → Condition → Email |
+### 💰 Finance (2 Templates)
+| Template | Description |
+|----------|-------------|
+| **Invoice Processing** | Extract data from invoices and update records |
+| **Expense Approval** | Route expense reports for approval |
 
-### 🤝 Cooperative Templates
+### 👥 HR (2 Templates)
+| Template | Description |
+|----------|-------------|
+| **Employee Onboarding** | Automate new hire setup across systems |
+| **Leave Request** | Process and route vacation requests |
 
-| Template | Description | Trigger | Actions |
-|----------|-------------|---------|---------|
-| **Member Onboarding** | Welcome new members | Webhook | HTTP → Email → SMS |
-| **Meeting Reminder** | SMS 1 day before meetings | Schedule (daily) | Database → Condition → SMS |
-| **Payment Reminder** | Email 3 days before due date | Schedule (daily) | Database → Condition → Email |
-| **Monthly Newsletter** | Automated member updates | Schedule (monthly) | Database → Email |
+### 🔧 IT Ops (2 Templates)
+| Template | Description |
+|----------|-------------|
+| **Database Sync** | Keep databases synchronized across environments |
+| **Backup Automation** | Scheduled backups with notifications |
+
+### 🛒 E-commerce (2 Templates)
+| Template | Description |
+|----------|-------------|
+| **Order Processing** | End-to-end order fulfillment automation |
+| **Abandoned Cart Recovery** | Win back lost sales with follow-up emails |
+
+### 📊 Analytics (1 Template)
+| Template | Description |
+|----------|-------------|
+| **Analytics Pipeline** | Aggregate data from multiple sources |
+
+### ⚖️ Legal (2 Templates)
+| Template | Description |
+|----------|-------------|
+| **Contract Generation** | Generate contracts from templates |
+| **AI Contract Review** | AI-powered contract analysis |
 
 ### Using Templates
 
-1. Navigate to **Templates** page in the app
-2. Browse templates by category (Clinic, Store, Cooperative)
-3. Click **Import Template**
+1. Browse templates on the **landing page**
+2. Click any template to **preview** the workflow
+3. Click **Use This Template** to import
 4. Customize nodes and connections as needed
 5. Save and activate your workflow
 

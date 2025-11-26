@@ -16,6 +16,26 @@ import {
   Github,
   CreditCard,
   Sheet,
+  Send,
+  Calendar,
+  FolderOpen,
+  GitMerge,
+  DollarSign,
+  BookOpen,
+  Table2,
+  Trello,
+  ListChecks,
+  Bot,
+  Brain,
+  Timer,
+  RefreshCw,
+  Phone,
+  Eye,
+  ShoppingCart,
+  Store,
+  Cloud,
+  Edit,
+  Search,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -35,133 +55,95 @@ const nodeCategories: NodeCategory[] = [
   {
     name: 'Triggers',
     nodes: [
-      {
-        type: NodeType.SCHEDULE,
-        label: 'Schedule',
-        icon: Clock,
-        description: 'Run on a schedule',
-      },
-      {
-        type: NodeType.WEBHOOK,
-        label: 'Webhook',
-        icon: Webhook,
-        description: 'Trigger via HTTP',
-      },
+      { type: NodeType.SCHEDULE, label: 'Schedule', icon: Clock, description: 'Run on a schedule' },
+      { type: NodeType.WEBHOOK, label: 'Webhook', icon: Webhook, description: 'Trigger via HTTP' },
+      { type: NodeType.DATABASE_WATCH, label: 'Database Watch', icon: Eye, description: 'Watch for database changes' },
+      { type: NodeType.ERROR_TRIGGER, label: 'Error Trigger', icon: AlertTriangle, description: 'Handle workflow errors' },
     ],
   },
   {
     name: 'Actions',
     nodes: [
-      {
-        type: NodeType.SEND_SMS,
-        label: 'Send SMS',
-        icon: MessageSquare,
-        description: 'Send SMS via Twilio',
-      },
-      {
-        type: NodeType.SEND_EMAIL,
-        label: 'Send Email',
-        icon: Mail,
-        description: 'Send email via SMTP',
-      },
-      {
-        type: NodeType.HTTP_REQUEST,
-        label: 'HTTP Request',
-        icon: Globe,
-        description: 'Make HTTP request',
-      },
+      { type: NodeType.SEND_SMS, label: 'Send SMS', icon: Phone, description: 'Send SMS via Twilio' },
+      { type: NodeType.SEND_EMAIL, label: 'Send Email', icon: Mail, description: 'Send email via SMTP' },
+      { type: NodeType.HTTP_REQUEST, label: 'HTTP Request', icon: Globe, description: 'Make HTTP request' },
     ],
   },
   {
     name: 'Data',
     nodes: [
-      {
-        type: NodeType.DATABASE_QUERY,
-        label: 'Database Query',
-        icon: Database,
-        description: 'Query database',
-      },
-      {
-        type: NodeType.CSV_IMPORT,
-        label: 'CSV Import',
-        icon: FileText,
-        description: 'Import CSV file',
-      },
-      {
-        type: NodeType.CSV_EXPORT,
-        label: 'CSV Export',
-        icon: FileText,
-        description: 'Export to CSV',
-      },
+      { type: NodeType.DATABASE_QUERY, label: 'Database Query', icon: Search, description: 'Query database' },
+      { type: NodeType.DATABASE_INSERT, label: 'Database Insert', icon: Database, description: 'Insert into database' },
+      { type: NodeType.DATABASE_UPDATE, label: 'Database Update', icon: Edit, description: 'Update database records' },
+      { type: NodeType.CSV_IMPORT, label: 'CSV Import', icon: FileText, description: 'Import CSV file' },
+      { type: NodeType.CSV_EXPORT, label: 'CSV Export', icon: FileText, description: 'Export to CSV' },
+      { type: NodeType.TRANSFORM, label: 'Transform Data', icon: RefreshCw, description: 'Transform data format' },
     ],
   },
   {
     name: 'Logic',
     nodes: [
-      {
-        type: NodeType.CONDITION,
-        label: 'Condition',
-        icon: GitBranch,
-        description: 'Branch logic',
-      },
-      {
-        type: NodeType.LOOP,
-        label: 'Loop',
-        icon: Repeat,
-        description: 'Iterate over items',
-      },
-      {
-        type: NodeType.ERROR_TRIGGER,
-        label: 'Error Trigger',
-        icon: AlertTriangle,
-        description: 'Handle errors',
-      },
+      { type: NodeType.CONDITION, label: 'Condition', icon: GitBranch, description: 'Branch logic' },
+      { type: NodeType.LOOP, label: 'Loop', icon: Repeat, description: 'Iterate over items' },
+      { type: NodeType.DELAY, label: 'Delay', icon: Timer, description: 'Wait before continuing' },
     ],
   },
   {
-    name: 'Integrations',
+    name: 'Communication',
     nodes: [
-      {
-        type: NodeType.SLACK,
-        label: 'Slack',
-        icon: Slack,
-        description: 'Send Slack messages',
-      },
-      {
-        type: NodeType.DISCORD,
-        label: 'Discord',
-        icon: MessageSquare,
-        description: 'Send Discord messages',
-      },
-      {
-        type: NodeType.GITHUB,
-        label: 'GitHub',
-        icon: Github,
-        description: 'GitHub operations',
-      },
-      {
-        type: NodeType.GOOGLE_SHEETS,
-        label: 'Google Sheets',
-        icon: Sheet,
-        description: 'Read/write spreadsheets',
-      },
-      {
-        type: NodeType.STRIPE,
-        label: 'Stripe',
-        icon: CreditCard,
-        description: 'Payment processing',
-      },
+      { type: NodeType.SLACK, label: 'Slack', icon: Slack, description: 'Send Slack messages' },
+      { type: NodeType.DISCORD, label: 'Discord', icon: MessageSquare, description: 'Send Discord messages' },
+      { type: NodeType.TELEGRAM, label: 'Telegram', icon: Send, description: 'Send Telegram messages' },
+      { type: NodeType.TWILIO, label: 'Twilio', icon: Phone, description: 'SMS & voice via Twilio' },
+    ],
+  },
+  {
+    name: 'Google Workspace',
+    nodes: [
+      { type: NodeType.GOOGLE_SHEETS, label: 'Google Sheets', icon: Sheet, description: 'Read/write spreadsheets' },
+      { type: NodeType.GOOGLE_DRIVE, label: 'Google Drive', icon: FolderOpen, description: 'Manage Drive files' },
+      { type: NodeType.GOOGLE_CALENDAR, label: 'Google Calendar', icon: Calendar, description: 'Manage calendar events' },
+      { type: NodeType.GMAIL, label: 'Gmail', icon: Mail, description: 'Send/read Gmail' },
+    ],
+  },
+  {
+    name: 'Development',
+    nodes: [
+      { type: NodeType.GITHUB, label: 'GitHub', icon: Github, description: 'GitHub operations' },
+      { type: NodeType.GITLAB, label: 'GitLab', icon: GitMerge, description: 'GitLab operations' },
+    ],
+  },
+  {
+    name: 'Payments',
+    nodes: [
+      { type: NodeType.STRIPE, label: 'Stripe', icon: CreditCard, description: 'Payment processing' },
+      { type: NodeType.PAYPAL, label: 'PayPal', icon: DollarSign, description: 'PayPal payments' },
+    ],
+  },
+  {
+    name: 'Productivity',
+    nodes: [
+      { type: NodeType.NOTION, label: 'Notion', icon: BookOpen, description: 'Notion pages & databases' },
+      { type: NodeType.AIRTABLE, label: 'Airtable', icon: Table2, description: 'Airtable records' },
+      { type: NodeType.TRELLO, label: 'Trello', icon: Trello, description: 'Trello boards & cards' },
+      { type: NodeType.ASANA, label: 'Asana', icon: ListChecks, description: 'Asana tasks & projects' },
     ],
   },
   {
     name: 'AI',
     nodes: [
-      {
-        type: NodeType.AI_GENERATE,
-        label: 'AI Generate',
-        icon: Sparkles,
-        description: 'Generate text with AI',
-      },
+      { type: NodeType.AI_GENERATE, label: 'AI Generate', icon: Sparkles, description: 'Generate text with AI' },
+      { type: NodeType.AI_PARSE, label: 'AI Parse', icon: Brain, description: 'Parse data with AI' },
+      { type: NodeType.OPENAI, label: 'OpenAI', icon: Bot, description: 'OpenAI GPT models' },
+      { type: NodeType.ANTHROPIC, label: 'Anthropic', icon: Bot, description: 'Claude AI models' },
+    ],
+  },
+  {
+    name: 'E-commerce',
+    nodes: [
+      { type: NodeType.POS_SHOPIFY, label: 'Shopify', icon: ShoppingCart, description: 'Shopify store operations' },
+      { type: NodeType.POS_SQUARE, label: 'Square', icon: Store, description: 'Square POS operations' },
+      { type: NodeType.SYNC_CLOUD, label: 'Cloud Sync', icon: Cloud, description: 'Sync to cloud services' },
     ],
   },
 ];
@@ -205,6 +187,7 @@ export default function NodePalette({ onAddNode }: NodePaletteProps) {
           return (
             <div key={category.name} className="mb-2">
               <button
+                type="button"
                 onClick={() => toggleCategory(category.name)}
                 className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
               >
@@ -220,6 +203,7 @@ export default function NodePalette({ onAddNode }: NodePaletteProps) {
                 <div className="mt-1 space-y-1">
                   {category.nodes.map((node) => (
                     <button
+                      type="button"
                       key={node.type}
                       onClick={() => onAddNode(node.type)}
                       className="w-full flex items-start gap-2 px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"

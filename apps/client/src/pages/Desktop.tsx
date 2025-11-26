@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Download, Zap, Shield, WifiOff, Sparkles, Play,
+  Download, Zap, Shield, WifiOff, Sparkles,
   Star, Workflow, Bot, Database
 } from 'lucide-react';
 

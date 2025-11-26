@@ -33,6 +33,7 @@ interface WorkflowCanvasProps {
   initialEdges?: Edge[];
   onSave?: (nodes: Node[], edges: Edge[]) => void;
   onExecute?: () => void;
+  onChange?: (nodes: Node[], edges: Edge[]) => void;
 }
 
 export default function WorkflowCanvas({
@@ -41,6 +42,7 @@ export default function WorkflowCanvas({
   initialEdges = [],
   onSave,
   onExecute,
+  onChange,
 }: WorkflowCanvasProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -61,6 +63,13 @@ export default function WorkflowCanvas({
       setEdges(initialEdges);
     }
   }, [initialEdges, setEdges]);
+
+  // Notify parent of changes for auto-save
+  useEffect(() => {
+    if (onChange && (nodes.length > 0 || edges.length > 0)) {
+      onChange(nodes, edges);
+    }
+  }, [nodes, edges, onChange]);
 
   const onConnect = useCallback(
     (params: Connection) => {

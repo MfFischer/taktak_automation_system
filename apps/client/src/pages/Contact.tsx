@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Send, ArrowLeft, MessageSquare, MapPin, Phone, Loader2 } from 'lucide-react';
+import { Mail, Send, ArrowLeft, MessageSquare, MapPin, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function Contact() {

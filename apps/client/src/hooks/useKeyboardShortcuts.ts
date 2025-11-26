@@ -81,7 +81,7 @@ export function useKeyboardShortcuts() {
         return;
       }
 
-      const { key, ctrlKey, metaKey, shiftKey, altKey } = event;
+      const { key, ctrlKey, metaKey } = event;
       const modKey = ctrlKey || metaKey; // Support both Ctrl and Cmd
 
       // Dashboard: Ctrl+D

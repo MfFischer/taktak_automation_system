@@ -20,7 +20,6 @@ export default function GuestWorkflow() {
   const navigate = useNavigate();
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const [templateName, setTemplateName] = useState('');
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
 
   useEffect(() => {
@@ -28,7 +27,6 @@ export default function GuestWorkflow() {
     const guestTemplateStr = sessionStorage.getItem('guestTemplate');
     if (guestTemplateStr) {
       const template = JSON.parse(guestTemplateStr);
-      setTemplateName(template.name);
 
       // Convert to ReactFlow format
       const flowNodes: Node[] = template.nodes.map((node: any) => ({

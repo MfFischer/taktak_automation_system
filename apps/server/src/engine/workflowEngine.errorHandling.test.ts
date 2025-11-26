@@ -106,8 +106,9 @@ describe('WorkflowEngine - Error Handling', () => {
             type: NodeType.CONDITION,
             name: 'Success Node',
             config: {
-              conditions: [{ field: 'test', operator: 'eq' as const, value: 'test' }],
-              logic: 'and' as const,
+              leftValue: 'test',
+              operator: 'equals',
+              rightValue: 'test',
             },
           },
         ],

@@ -18,7 +18,7 @@ import axios from 'axios';
 import {
   FileSpreadsheet, MessageSquare, Calendar, CreditCard, Database,
   Bell, Users, ShoppingCart, FileText, BarChart3, Mail, Star, Zap,
-  Sparkles, Shield, Lock, Clock, Cloud
+  Sparkles, Shield, Cloud
 } from 'lucide-react';
 
 // Static sample workflows (same as Home page)
@@ -149,35 +149,6 @@ export default function TemplatePreview() {
       setStaticTemplate(null);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleTryWithoutSignup = () => {
-    // Store template in session storage for guest users
-    const tmpl = template || staticTemplate;
-    if (tmpl) {
-      // Convert static template to expected format
-      const guestTemplate = staticTemplate ? {
-        _id: staticTemplate.id,
-        name: staticTemplate.name,
-        description: staticTemplate.description,
-        category: staticTemplate.category,
-        nodes: staticTemplate.nodes.map((name: string, idx: number) => ({
-          id: `node-${idx}`,
-          name,
-          type: name.toLowerCase().replace(/\s+/g, '_'),
-          position: { x: 100 + idx * 200, y: 150 },
-        })),
-        edges: staticTemplate.nodes.slice(0, -1).map((_: string, idx: number) => ({
-          id: `edge-${idx}`,
-          source: `node-${idx}`,
-          target: `node-${idx + 1}`,
-        })),
-        tags: [staticTemplate.category],
-      } : tmpl;
-
-      sessionStorage.setItem('guestTemplate', JSON.stringify(guestTemplate));
-      navigate('/workflow/guest');
     }
   };
 

@@ -7,7 +7,7 @@ import {
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
 import ThemeToggle from '../components/ThemeToggle';
-import { useTheme } from '../contexts/ThemeContext';
+
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('profile');

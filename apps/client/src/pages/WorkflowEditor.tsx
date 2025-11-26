@@ -1,12 +1,15 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Node, Edge } from 'reactflow';
-import { ArrowLeft, Loader2, History } from 'lucide-react';
+import { ArrowLeft, Loader2, History, Save, Cloud, CloudOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import WorkflowCanvas from '../components/workflow/WorkflowCanvas';
 import { WorkflowVersionHistory } from '../components/WorkflowVersionHistory';
 import { api } from '../services/api';
+
+// Auto-save configuration
+const AUTO_SAVE_DELAY = 3000; // 3 seconds debounce
 
 interface WorkflowNode {
   id: string;
@@ -42,6 +45,14 @@ export default function WorkflowEditor() {
   const [initialNodes, setInitialNodes] = useState<Node[]>([]);
   const [initialEdges, setInitialEdges] = useState<Edge[]>([]);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
+
+  // Auto-save state
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const currentNodesRef = useRef<Node[]>([]);
+  const currentEdgesRef = useRef<Edge[]>([]);
 
   // Fetch workflow data if editing existing workflow
   useEffect(() => {
@@ -145,6 +156,8 @@ export default function WorkflowEditor() {
           // Navigate to the new workflow editor
           navigate(`/app/workflows/${newWorkflowId}`);
         }
+        setLastSaved(new Date());
+        setHasUnsavedChanges(false);
       } catch (error: any) {
         toast.error(error.message || 'Failed to save workflow');
         console.error('Save error:', error);
@@ -154,6 +167,78 @@ export default function WorkflowEditor() {
     },
     [workflowName, workflow, id, navigate]
   );
+
+  // Auto-save function (silent, no toast)
+  const performAutoSave = useCallback(async () => {
+    if (!id || !autoSaveEnabled || currentNodesRef.current.length === 0) return;
+
+    setIsSaving(true);
+    try {
+      const workflowNodes: WorkflowNode[] = currentNodesRef.current.map((node) => ({
+        id: node.id,
+        type: node.data.nodeType || 'CUSTOM',
+        name: node.data.label || 'Untitled Node',
+        config: node.data.config || {},
+        position: node.position,
+      }));
+
+      const workflowConnections: WorkflowConnection[] = currentEdgesRef.current.map((edge) => ({
+        from: edge.source,
+        to: edge.target,
+        condition: edge.label as string | undefined,
+      }));
+
+      const triggerNode = workflowNodes.find(
+        (node) => node.type === 'SCHEDULE' || node.type === 'WEBHOOK' || node.type === 'DATABASE_WATCH'
+      ) || workflowNodes[0];
+
+      if (!triggerNode) return;
+
+      const workflowData = {
+        name: workflowName,
+        description: workflow?.description || '',
+        nodes: workflowNodes,
+        connections: workflowConnections,
+        trigger: triggerNode,
+      };
+
+      await api.workflows.update(id, workflowData);
+      setLastSaved(new Date());
+      setHasUnsavedChanges(false);
+    } catch (error) {
+      console.error('Auto-save error:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [id, autoSaveEnabled, workflowName, workflow]);
+
+  // Handle workflow changes for auto-save
+  const handleWorkflowChange = useCallback((nodes: Node[], edges: Edge[]) => {
+    currentNodesRef.current = nodes;
+    currentEdgesRef.current = edges;
+    setHasUnsavedChanges(true);
+
+    // Clear existing timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    // Set new auto-save timer (only for existing workflows)
+    if (id && autoSaveEnabled) {
+      autoSaveTimerRef.current = setTimeout(() => {
+        performAutoSave();
+      }, AUTO_SAVE_DELAY);
+    }
+  }, [id, autoSaveEnabled, performAutoSave]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleExecute = useCallback(async () => {
     if (!id) {
@@ -215,12 +300,46 @@ export default function WorkflowEditor() {
               placeholder="Workflow name"
             />
           </div>
-          <div className="flex items-center gap-2">
-            {isSaving && (
-              <span className="text-sm text-gray-500">Saving...</span>
+          <div className="flex items-center gap-3">
+            {/* Auto-save status indicator */}
+            <div className="flex items-center gap-2 text-sm">
+              {isSaving ? (
+                <span className="flex items-center gap-1 text-blue-500">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving...
+                </span>
+              ) : hasUnsavedChanges ? (
+                <span className="flex items-center gap-1 text-yellow-500">
+                  <CloudOff className="w-4 h-4" />
+                  Unsaved
+                </span>
+              ) : lastSaved ? (
+                <span className="flex items-center gap-1 text-green-500">
+                  <Cloud className="w-4 h-4" />
+                  Saved
+                </span>
+              ) : null}
+            </div>
+
+            {/* Auto-save toggle */}
+            {id && (
+              <button
+                type="button"
+                onClick={() => setAutoSaveEnabled(!autoSaveEnabled)}
+                className={`flex items-center gap-1 px-2 py-1 text-xs rounded-lg transition-colors ${
+                  autoSaveEnabled
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                }`}
+                title={autoSaveEnabled ? 'Auto-save enabled' : 'Auto-save disabled'}
+              >
+                <Save className="w-3 h-3" />
+                Auto
+              </button>
             )}
+
             <span className="text-sm text-gray-500">
-              {id ? `Editing: ${id.substring(0, 20)}...` : 'New Workflow'}
+              {id ? `Editing: ${id.substring(0, 8)}...` : 'New Workflow'}
             </span>
             {workflow && (
               <>
@@ -233,7 +352,7 @@ export default function WorkflowEditor() {
                   className="flex items-center gap-2 px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <History className="w-4 h-4" />
-                  Version History
+                  History
                 </button>
               </>
             )}
@@ -249,6 +368,7 @@ export default function WorkflowEditor() {
           initialEdges={initialEdges}
           onSave={handleSave}
           onExecute={handleExecute}
+          onChange={handleWorkflowChange}
         />
       </div>
 

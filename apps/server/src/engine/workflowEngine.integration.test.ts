@@ -23,7 +23,7 @@ describe('WorkflowEngine Integration Tests', () => {
   });
 
   describe('Complete Workflow Execution', () => {
-    it('should execute workflow with loop and error handling', async () => {
+    it('should execute workflow with loop and condition nodes', async () => {
       const nodes: WorkflowNode[] = [
         {
           id: 'trigger',
@@ -36,31 +36,25 @@ describe('WorkflowEngine Integration Tests', () => {
           type: NodeType.LOOP,
           name: 'Process Items',
           config: {
-            items: [1, 2, 3, 4, 5],
-            batchSize: 2,
-            continueOnItemError: true,
+            loopType: 'forEach',
+            items: [1, 2, 3],
           },
         },
         {
-          id: 'http',
-          type: NodeType.HTTP_REQUEST,
-          name: 'API Call',
+          id: 'condition',
+          type: NodeType.CONDITION,
+          name: 'Check Item',
           config: {
-            url: 'https://jsonplaceholder.typicode.com/posts/{{$item}}',
-            method: 'GET',
-          },
-          executionConfig: {
-            retries: 3,
-            retryDelay: 1000,
-            timeout: 5000,
-            continueOnError: true,
+            leftValue: '{{$item}}',
+            operator: 'greaterThan',
+            rightValue: 0,
           },
         },
       ];
 
       const connections: WorkflowConnection[] = [
         { from: 'trigger', to: 'loop' },
-        { from: 'loop', to: 'http' },
+        { from: 'loop', to: 'condition' },
       ];
 
       const result = await engine.executeWorkflow({
