@@ -164,17 +164,62 @@ export default function Desktop() {
             </p>
           </div>
 
-          {/* Demo Video Placeholder */}
+          {/* Desktop App Screenshot / Workflow Demo */}
           <div className="max-w-5xl mx-auto">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-700">
-              <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-                <button className="w-20 h-20 rounded-full bg-blue-600 hover:bg-blue-700 transition-colors flex items-center justify-center group">
-                  <Play className="w-8 h-8 text-white ml-1 group-hover:scale-110 transition-transform" />
-                </button>
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-700 bg-gray-800">
+              {/* Fake App Window */}
+              <div className="bg-gray-900 px-4 py-3 flex items-center gap-2 border-b border-gray-700">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+                <div className="flex-1 text-center text-sm text-gray-400">Taktak Desktop — Workflow Editor</div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-gray-900/50 to-transparent pointer-events-none"></div>
+
+              {/* Workflow Canvas Preview */}
+              <div className="aspect-video bg-gradient-to-br from-gray-850 to-gray-900 p-8 relative">
+                {/* Sample workflow nodes */}
+                <div className="flex items-center justify-center gap-8 h-full">
+                  {/* Trigger Node */}
+                  <div className="bg-blue-600/20 border-2 border-blue-500 rounded-xl p-4 text-center animate-pulse">
+                    <div className="w-10 h-10 bg-blue-500 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                      <Zap className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-sm text-white font-medium">Form Trigger</span>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+
+                  {/* AI Node */}
+                  <div className="bg-purple-600/20 border-2 border-purple-500 rounded-xl p-4 text-center">
+                    <div className="w-10 h-10 bg-purple-500 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                      <Bot className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-sm text-white font-medium">AI Process</span>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="w-16 h-0.5 bg-gradient-to-r from-purple-500 to-green-500"></div>
+
+                  {/* Action Node */}
+                  <div className="bg-green-600/20 border-2 border-green-500 rounded-xl p-4 text-center">
+                    <div className="w-10 h-10 bg-green-500 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                      <Database className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-sm text-white font-medium">Save to DB</span>
+                  </div>
+                </div>
+
+                {/* Floating badge */}
+                <div className="absolute bottom-4 right-4 bg-green-500/20 border border-green-500 rounded-full px-3 py-1 flex items-center gap-2">
+                  <WifiOff className="w-4 h-4 text-green-400" />
+                  <span className="text-sm text-green-400">Works Offline</span>
+                </div>
+              </div>
             </div>
-            <p className="text-center text-gray-400 mt-4">Watch how Taktak Desktop automates your business in 2 minutes</p>
+            <p className="text-center text-gray-400 mt-4">Build powerful workflows with our intuitive drag-and-drop editor</p>
           </div>
         </div>
       </section>
@@ -299,10 +344,10 @@ export default function Desktop() {
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-white mb-4">Resources</h3>
+              <h3 className="font-semibold text-white mb-4">Support</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="https://github.com/MfFischer/taktak_automation_system" className="text-gray-400 hover:text-white transition-colors">Documentation</a></li>
-                <li><a href="https://github.com/MfFischer/taktak_automation_system" className="text-gray-400 hover:text-white transition-colors">GitHub</a></li>
+                <li><button type="button" onClick={() => navigate('/contact')} className="text-gray-400 hover:text-white transition-colors">Contact Us</button></li>
+                <li><button type="button" onClick={() => navigate('/help')} className="text-gray-400 hover:text-white transition-colors">Help Center</button></li>
               </ul>
             </div>
             <div>
