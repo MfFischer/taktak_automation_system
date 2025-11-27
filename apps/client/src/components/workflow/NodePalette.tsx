@@ -36,126 +36,125 @@ import {
   Cloud,
   Edit,
   Search,
+  LucideIcon,
+  HelpCircle,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
-import { NodeType } from '@taktak/types';
+import {
+  NodeType,
+  NODE_REGISTRY,
+  CATEGORY_REGISTRY,
+  NodeMetadata,
+  NodeCategory as NodeCategoryType
+} from '@taktak/types';
 
-interface NodeCategory {
-  name: string;
-  nodes: {
-    type: NodeType;
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-    description: string;
-  }[];
+// Map icon names from NODE_REGISTRY to actual Lucide components
+const ICON_MAP: Record<string, LucideIcon> = {
+  Clock,
+  MessageSquare,
+  Mail,
+  Database,
+  GitBranch,
+  Sparkles,
+  Webhook,
+  Globe,
+  FileText,
+  Repeat,
+  AlertTriangle,
+  Slack,
+  Github,
+  CreditCard,
+  Sheet,
+  Send,
+  Calendar,
+  FolderOpen,
+  GitMerge,
+  DollarSign,
+  BookOpen,
+  Table2,
+  Trello,
+  ListChecks,
+  Bot,
+  Brain,
+  Timer,
+  RefreshCw,
+  Phone,
+  Eye,
+  ShoppingCart,
+  Store,
+  Cloud,
+  Edit,
+  Search,
+};
+
+// Get icon component from icon name
+function getIcon(iconName: string): LucideIcon {
+  return ICON_MAP[iconName] || HelpCircle;
 }
 
-const nodeCategories: NodeCategory[] = [
-  {
-    name: 'Triggers',
-    nodes: [
-      { type: NodeType.SCHEDULE, label: 'Schedule', icon: Clock, description: 'Run on a schedule' },
-      { type: NodeType.WEBHOOK, label: 'Webhook', icon: Webhook, description: 'Trigger via HTTP' },
-      { type: NodeType.DATABASE_WATCH, label: 'Database Watch', icon: Eye, description: 'Watch for database changes' },
-      { type: NodeType.ERROR_TRIGGER, label: 'Error Trigger', icon: AlertTriangle, description: 'Handle workflow errors' },
-    ],
-  },
-  {
-    name: 'Actions',
-    nodes: [
-      { type: NodeType.SEND_SMS, label: 'Send SMS', icon: Phone, description: 'Send SMS via Twilio' },
-      { type: NodeType.SEND_EMAIL, label: 'Send Email', icon: Mail, description: 'Send email via SMTP' },
-      { type: NodeType.HTTP_REQUEST, label: 'HTTP Request', icon: Globe, description: 'Make HTTP request' },
-    ],
-  },
-  {
-    name: 'Data',
-    nodes: [
-      { type: NodeType.DATABASE_QUERY, label: 'Database Query', icon: Search, description: 'Query database' },
-      { type: NodeType.DATABASE_INSERT, label: 'Database Insert', icon: Database, description: 'Insert into database' },
-      { type: NodeType.DATABASE_UPDATE, label: 'Database Update', icon: Edit, description: 'Update database records' },
-      { type: NodeType.CSV_IMPORT, label: 'CSV Import', icon: FileText, description: 'Import CSV file' },
-      { type: NodeType.CSV_EXPORT, label: 'CSV Export', icon: FileText, description: 'Export to CSV' },
-      { type: NodeType.TRANSFORM, label: 'Transform Data', icon: RefreshCw, description: 'Transform data format' },
-    ],
-  },
-  {
-    name: 'Logic',
-    nodes: [
-      { type: NodeType.CONDITION, label: 'Condition', icon: GitBranch, description: 'Branch logic' },
-      { type: NodeType.LOOP, label: 'Loop', icon: Repeat, description: 'Iterate over items' },
-      { type: NodeType.DELAY, label: 'Delay', icon: Timer, description: 'Wait before continuing' },
-    ],
-  },
-  {
-    name: 'Communication',
-    nodes: [
-      { type: NodeType.SLACK, label: 'Slack', icon: Slack, description: 'Send Slack messages' },
-      { type: NodeType.DISCORD, label: 'Discord', icon: MessageSquare, description: 'Send Discord messages' },
-      { type: NodeType.TELEGRAM, label: 'Telegram', icon: Send, description: 'Send Telegram messages' },
-      { type: NodeType.TWILIO, label: 'Twilio', icon: Phone, description: 'SMS & voice via Twilio' },
-    ],
-  },
-  {
-    name: 'Google Workspace',
-    nodes: [
-      { type: NodeType.GOOGLE_SHEETS, label: 'Google Sheets', icon: Sheet, description: 'Read/write spreadsheets' },
-      { type: NodeType.GOOGLE_DRIVE, label: 'Google Drive', icon: FolderOpen, description: 'Manage Drive files' },
-      { type: NodeType.GOOGLE_CALENDAR, label: 'Google Calendar', icon: Calendar, description: 'Manage calendar events' },
-      { type: NodeType.GMAIL, label: 'Gmail', icon: Mail, description: 'Send/read Gmail' },
-    ],
-  },
-  {
-    name: 'Development',
-    nodes: [
-      { type: NodeType.GITHUB, label: 'GitHub', icon: Github, description: 'GitHub operations' },
-      { type: NodeType.GITLAB, label: 'GitLab', icon: GitMerge, description: 'GitLab operations' },
-    ],
-  },
-  {
-    name: 'Payments',
-    nodes: [
-      { type: NodeType.STRIPE, label: 'Stripe', icon: CreditCard, description: 'Payment processing' },
-      { type: NodeType.PAYPAL, label: 'PayPal', icon: DollarSign, description: 'PayPal payments' },
-    ],
-  },
-  {
-    name: 'Productivity',
-    nodes: [
-      { type: NodeType.NOTION, label: 'Notion', icon: BookOpen, description: 'Notion pages & databases' },
-      { type: NodeType.AIRTABLE, label: 'Airtable', icon: Table2, description: 'Airtable records' },
-      { type: NodeType.TRELLO, label: 'Trello', icon: Trello, description: 'Trello boards & cards' },
-      { type: NodeType.ASANA, label: 'Asana', icon: ListChecks, description: 'Asana tasks & projects' },
-    ],
-  },
-  {
-    name: 'AI',
-    nodes: [
-      { type: NodeType.AI_GENERATE, label: 'AI Generate', icon: Sparkles, description: 'Generate text with AI' },
-      { type: NodeType.AI_PARSE, label: 'AI Parse', icon: Brain, description: 'Parse data with AI' },
-      { type: NodeType.OPENAI, label: 'OpenAI', icon: Bot, description: 'OpenAI GPT models' },
-      { type: NodeType.ANTHROPIC, label: 'Anthropic', icon: Bot, description: 'Claude AI models' },
-    ],
-  },
-  {
-    name: 'E-commerce',
-    nodes: [
-      { type: NodeType.POS_SHOPIFY, label: 'Shopify', icon: ShoppingCart, description: 'Shopify store operations' },
-      { type: NodeType.POS_SQUARE, label: 'Square', icon: Store, description: 'Square POS operations' },
-      { type: NodeType.SYNC_CLOUD, label: 'Cloud Sync', icon: Cloud, description: 'Sync to cloud services' },
-    ],
-  },
-];
+// Status badge colors
+function getStatusBadge(status: NodeMetadata['status']): { bg: string; text: string; label: string } | null {
+  switch (status) {
+    case 'beta':
+      return { bg: 'bg-yellow-100 dark:bg-yellow-900', text: 'text-yellow-800 dark:text-yellow-200', label: 'Beta' };
+    case 'planned':
+      return { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-500 dark:text-gray-400', label: 'Soon' };
+    default:
+      return null;
+  }
+}
+
+interface NodePaletteCategory {
+  id: NodeCategoryType;
+  label: string;
+  nodes: NodeMetadata[];
+}
+
+// Build categories from the shared registry
+function buildCategories(): NodePaletteCategory[] {
+  const categories: NodePaletteCategory[] = [];
+
+  for (const cat of CATEGORY_REGISTRY) {
+    const nodes = Object.values(NODE_REGISTRY)
+      .filter((node) => node.category === cat.id)
+      .sort((a, b) => {
+        // Sort by status: stable first, then beta, then planned
+        const statusOrder = { stable: 0, beta: 1, planned: 2 };
+        return statusOrder[a.status] - statusOrder[b.status];
+      });
+
+    if (nodes.length > 0) {
+      categories.push({
+        id: cat.id,
+        label: cat.label,
+        nodes,
+      });
+    }
+  }
+
+  return categories;
+}
 
 interface NodePaletteProps {
   onAddNode: (type: NodeType) => void;
+  showPlannedNodes?: boolean; // Option to show/hide planned nodes
 }
 
-export default function NodePalette({ onAddNode }: NodePaletteProps) {
+export default function NodePalette({ onAddNode, showPlannedNodes = true }: NodePaletteProps) {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(['Triggers', 'Actions'])
   );
+
+  // Build categories from registry (memoized)
+  const nodeCategories = useMemo(() => buildCategories(), []);
+
+  // Calculate total implemented nodes for display
+  const implementedCount = useMemo(() => {
+    return Object.values(NODE_REGISTRY).filter(
+      (n) => n.backendImplemented && n.frontendImplemented
+    ).length;
+  }, []);
 
   const toggleCategory = (categoryName: string) => {
     setExpandedCategories((prev) => {
@@ -176,22 +175,32 @@ export default function NodePalette({ onAddNode }: NodePaletteProps) {
           Node Palette
         </h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Drag or click to add nodes
+          {implementedCount} nodes available
         </p>
       </div>
 
       <div className="p-2">
         {nodeCategories.map((category) => {
-          const isExpanded = expandedCategories.has(category.name);
+          const isExpanded = expandedCategories.has(category.label);
+
+          // Filter nodes based on showPlannedNodes setting
+          const visibleNodes = showPlannedNodes
+            ? category.nodes
+            : category.nodes.filter((n) => n.status !== 'planned');
+
+          if (visibleNodes.length === 0) return null;
 
           return (
-            <div key={category.name} className="mb-2">
+            <div key={category.id} className="mb-2">
               <button
                 type="button"
-                onClick={() => toggleCategory(category.name)}
+                onClick={() => toggleCategory(category.label)}
                 className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
               >
-                <span>{category.name}</span>
+                <span className="flex items-center gap-2">
+                  {category.label}
+                  <span className="text-xs text-gray-400">({visibleNodes.length})</span>
+                </span>
                 {isExpanded ? (
                   <ChevronDown className="w-4 h-4" />
                 ) : (
@@ -201,24 +210,47 @@ export default function NodePalette({ onAddNode }: NodePaletteProps) {
 
               {isExpanded && (
                 <div className="mt-1 space-y-1">
-                  {category.nodes.map((node) => (
-                    <button
-                      type="button"
-                      key={node.type}
-                      onClick={() => onAddNode(node.type)}
-                      className="w-full flex items-start gap-2 px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                    >
-                      <node.icon className="w-4 h-4 mt-0.5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {node.label}
+                  {visibleNodes.map((node) => {
+                    const IconComponent = getIcon(node.icon);
+                    const statusBadge = getStatusBadge(node.status);
+                    const isDisabled = node.status === 'planned';
+
+                    return (
+                      <button
+                        type="button"
+                        key={node.type}
+                        onClick={() => !isDisabled && onAddNode(node.type)}
+                        disabled={isDisabled}
+                        className={`w-full flex items-start gap-2 px-3 py-2 text-left rounded transition-colors ${
+                          isDisabled
+                            ? 'opacity-50 cursor-not-allowed'
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                        }`}
+                        title={isDisabled ? 'Coming soon' : node.description}
+                      >
+                        <IconComponent className="w-4 h-4 mt-0.5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm font-medium ${
+                              isDisabled
+                                ? 'text-gray-400 dark:text-gray-500'
+                                : 'text-gray-900 dark:text-white'
+                            }`}>
+                              {node.label}
+                            </span>
+                            {statusBadge && (
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded ${statusBadge.bg} ${statusBadge.text}`}>
+                                {statusBadge.label}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {node.description}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {node.description}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

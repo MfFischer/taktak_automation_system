@@ -16,6 +16,8 @@ export interface AuthUser {
   name: string;
   tier: UserTier;
   usageStats: UsageStats;
+  role?: 'admin' | 'user';
+  createdAt?: string;
 }
 
 // Extend Express Request type

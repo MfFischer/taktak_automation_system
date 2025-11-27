@@ -94,31 +94,31 @@ export const ExecutionHistoryChart: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="card p-6">
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-48 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-dark-border rounded w-1/3 mb-4"></div>
+          <div className="h-48 bg-dark-border rounded"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="card p-6">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Execution History</h2>
-          <p className="text-sm text-gray-600 mt-1">Last 7 days</p>
+          <h2 className="text-2xl font-bold text-white">Execution History</h2>
+          <p className="text-sm text-gray-400 mt-1">Last 7 days</p>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold text-gray-900">{stats.totalExecutions}</div>
+          <div className="text-3xl font-bold text-white">{stats.totalExecutions}</div>
           <div className="flex items-center justify-end space-x-1 text-sm">
             {stats.trend >= 0 ? (
-              <TrendingUp className="w-4 h-4 text-green-500" />
+              <TrendingUp className="w-4 h-4 text-success-400" />
             ) : (
-              <TrendingDown className="w-4 h-4 text-red-500" />
+              <TrendingDown className="w-4 h-4 text-error-400" />
             )}
-            <span className={stats.trend >= 0 ? 'text-green-600' : 'text-red-600'}>
+            <span className={stats.trend >= 0 ? 'text-success-400' : 'text-error-400'}>
               {Math.abs(stats.trend)}%
             </span>
           </div>
@@ -129,12 +129,12 @@ export const ExecutionHistoryChart: React.FC = () => {
       <div className="space-y-3">
         {data.map((item) => (
           <div key={item.date} className="flex items-center space-x-3">
-            <div className="w-16 text-xs text-gray-600">{formatDate(item.date)}</div>
+            <div className="w-16 text-xs text-gray-400">{formatDate(item.date)}</div>
             <div className="flex-1 flex items-center space-x-1">
-              <div className="flex-1 bg-gray-100 rounded-full h-8 overflow-hidden flex">
+              <div className="flex-1 bg-dark-border rounded-full h-8 overflow-hidden flex">
                 {item.success > 0 && (
                   <div
-                    className="bg-green-500 flex items-center justify-center text-white text-xs font-medium"
+                    className="bg-success-500 flex items-center justify-center text-white text-xs font-medium"
                     style={{ width: `${(item.success / maxValue) * 100}%` }}
                   >
                     {item.success > 0 && <span className="px-2">{item.success}</span>}
@@ -142,7 +142,7 @@ export const ExecutionHistoryChart: React.FC = () => {
                 )}
                 {item.failed > 0 && (
                   <div
-                    className="bg-red-500 flex items-center justify-center text-white text-xs font-medium"
+                    className="bg-error-500 flex items-center justify-center text-white text-xs font-medium"
                     style={{ width: `${(item.failed / maxValue) * 100}%` }}
                   >
                     {item.failed > 0 && <span className="px-2">{item.failed}</span>}
@@ -155,14 +155,14 @@ export const ExecutionHistoryChart: React.FC = () => {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center space-x-6 mt-6 pt-4 border-t">
+      <div className="flex items-center justify-center space-x-6 mt-6 pt-4 border-t border-dark-border">
         <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-green-500 rounded"></div>
-          <span className="text-sm text-gray-600">Success ({stats.successRate}%)</span>
+          <div className="w-3 h-3 bg-success-500 rounded"></div>
+          <span className="text-sm text-gray-400">Success ({stats.successRate}%)</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-red-500 rounded"></div>
-          <span className="text-sm text-gray-600">Failed ({100 - stats.successRate}%)</span>
+          <div className="w-3 h-3 bg-error-500 rounded"></div>
+          <span className="text-sm text-gray-400">Failed ({100 - stats.successRate}%)</span>
         </div>
       </div>
     </div>

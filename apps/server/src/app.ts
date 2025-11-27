@@ -27,6 +27,7 @@ import templateRoutes from './routes/templates';
 import licenseRoutes from './routes/license';
 import lemonsqueezyRoutes from './routes/lemonsqueezy';
 import oauth2Routes from './routes/oauth2';
+import gdprRoutes from './routes/gdpr';
 
 /**
  * Creates and configures Express application
@@ -87,6 +88,7 @@ export function createApp(): Application {
   app.use('/api/license', licenseRoutes);
   app.use('/api/lemonsqueezy', lemonsqueezyRoutes);
   app.use('/api/oauth2', oauth2Routes);
+  app.use('/api/gdpr', gdprRoutes);
 
   // Root endpoint
   app.get('/', (_req, res) => {

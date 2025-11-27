@@ -108,6 +108,7 @@ export default function Settings() {
     { id: 'cloud-sync', name: 'Cloud Sync', icon: Cloud },
     { id: 'notifications', name: 'Notifications', icon: Bell },
     { id: 'security', name: 'Security', icon: Shield },
+    { id: 'privacy', name: 'Privacy & Data', icon: Lock },
   ];
 
   return (
@@ -780,6 +781,89 @@ export default function Settings() {
                         <span>Check for Updates</span>
                       </>
                     )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Privacy & Data Tab */}
+          {activeTab === 'privacy' && (
+            <div className="card-elevated space-y-6 animate-fade-in-up">
+              <div className="flex items-center space-x-3 pb-6 border-b border-dark-border">
+                <div className="p-3 bg-gradient-taktak rounded-xl shadow-glow">
+                  <Lock className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Privacy & Data</h2>
+                  <p className="text-gray-400">Manage your data and privacy settings (GDPR)</p>
+                </div>
+              </div>
+
+              {/* Data Export */}
+              <div className="p-4 bg-dark-card rounded-xl border border-dark-border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-white">Export Your Data</p>
+                    <p className="text-sm text-gray-400">Download all your data in JSON format</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/gdpr/export', {
+                          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                        });
+                        const blob = await response.blob();
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'taktak-data-export.json';
+                        a.click();
+                        toast.success('Data exported successfully');
+                      } catch {
+                        toast.error('Failed to export data');
+                      }
+                    }}
+                    className="btn btn-secondary"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Data
+                  </button>
+                </div>
+              </div>
+
+              {/* Audit Logs */}
+              <div className="p-4 bg-dark-card rounded-xl border border-dark-border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-white">Activity Log</p>
+                    <p className="text-sm text-gray-400">View your account activity history</p>
+                  </div>
+                  <a href="/audit-logs" className="btn btn-secondary">
+                    <Shield className="w-4 h-4 mr-2" />
+                    View Logs
+                  </a>
+                </div>
+              </div>
+
+              {/* Delete Account */}
+              <div className="p-4 bg-red-900/20 rounded-xl border border-red-500/30">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-red-400">Delete Account</p>
+                    <p className="text-sm text-gray-400">Permanently delete your account and all data</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm('Are you sure? This action cannot be undone.')) {
+                        toast.error('Please contact support to delete your account');
+                      }
+                    }}
+                    className="btn bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Delete Account
                   </button>
                 </div>
               </div>

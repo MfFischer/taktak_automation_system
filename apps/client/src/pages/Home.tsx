@@ -34,12 +34,13 @@ export default function Home() {
 
       const data = await response.json();
 
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+      if (response.ok && data.success) {
+        // API returns { success: true, data: { user, token } }
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('user', JSON.stringify(data.data.user));
         navigate('/app');
       } else {
-        setError(data.message || 'Login failed');
+        setError(data.error?.message || data.message || 'Login failed');
       }
     } catch (err) {
       setError('Network error. Please try again.');

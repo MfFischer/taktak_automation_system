@@ -358,5 +358,23 @@ export class AuthService {
       return null;
     }
   }
+
+  /**
+   * Delete a user account (GDPR compliance)
+   */
+  async deleteUser(userId: string): Promise<void> {
+    logger.warn('Deleting user account', { userId });
+
+    try {
+      const user = await this.db.get(userId) as User;
+      await this.db.remove(user._id, user._rev!);
+      logger.info('User account deleted', { userId });
+    } catch (error) {
+      if ((error as any).status === 404) {
+        throw new NotFoundError('User not found');
+      }
+      throw error;
+    }
+  }
 }
 

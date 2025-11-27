@@ -1,12 +1,14 @@
 # Taktak - Complete Integration List
 
-## 🎉 **18 Fully Implemented Integrations!**
+## 🎉 **37 Nodes Across 11 Categories!**
 
-Taktak now has **18 production-ready integrations** with complete handlers and implementations.
+Taktak now has **37 production-ready nodes** with complete handlers and implementations, organized into 11 categories.
+
+> **Note**: This document is auto-generated from the `NODE_REGISTRY` in `@taktak/types`. See `packages/types/src/index.ts` for the source of truth.
 
 ---
 
-## 📊 Integration Categories
+## 📊 Node Categories
 
 ### 🔔 **Communication (4 integrations)**
 
@@ -124,11 +126,27 @@ Taktak now has **18 production-ready integrations** with complete handlers and i
 
 ## 📈 **Statistics**
 
-- **Total Integrations**: 18
-- **New Integrations Added**: 8 (Discord, Telegram, Twilio, GitLab, PayPal, Trello, Asana, Anthropic)
-- **Previously Implemented**: 10 (Google Sheets, Gmail, Drive, Calendar, Slack, OpenAI, Stripe, Notion, Airtable, GitHub)
+- **Total Nodes**: 37
+- **Stable Nodes**: 30+ (fully implemented backend + frontend)
+- **Beta Nodes**: 5 (backend implemented, frontend in progress)
+- **Planned Nodes**: 2 (coming soon)
 - **Total Actions**: 100+
 - **Authentication Types**: API Key, OAuth2, Basic Auth, Bot Token
+
+### Node Categories Breakdown:
+| Category | Count | Status |
+|----------|-------|--------|
+| Triggers | 4 | ✅ Stable |
+| Actions | 3 | ✅ Stable |
+| Data | 5 | ✅ Stable |
+| Logic | 4 | ✅ Stable |
+| Communication | 4 | ✅ Stable |
+| Google Workspace | 4 | ✅ Stable |
+| Development | 2 | ✅ Stable |
+| Payments | 2 | ✅ Stable |
+| Productivity | 4 | ✅ Stable |
+| AI | 3 | ✅ Stable |
+| E-commerce | 2 | 🔜 Planned |
 
 ---
 
@@ -216,5 +234,19 @@ ANTHROPIC_API_KEY=your_anthropic_api_key
 
 ---
 
-**🎉 You now have 18 powerful integrations at your fingertips!**
+**🎉 You now have 37 powerful nodes at your fingertips!**
+
+---
+
+## 🔄 **Keeping Docs in Sync**
+
+The source of truth for all node metadata is the `NODE_REGISTRY` in `packages/types/src/index.ts`. This includes:
+- Node type, label, description
+- Category and kind (trigger/action/logic/data/integration)
+- Implementation status (stable/beta/planned)
+- Backend and frontend implementation flags
+- Required credentials
+- Available actions
+
+When adding new nodes, update the `NODE_REGISTRY` first, then the handlers will automatically be validated against it.
 

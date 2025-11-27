@@ -470,5 +470,17 @@ export class WorkflowService {
     logger.info('Pruned workflow versions', { workflowId, deletedCount });
     return deletedCount;
   }
+
+  /**
+   * Get all workflows for a specific user (for GDPR data export)
+   */
+  async getWorkflowsByUser(userId: string): Promise<Workflow[]> {
+    const { workflows } = await this.listWorkflows({
+      userId,
+      page: 1,
+      limit: 10000, // Get all workflows
+    });
+    return workflows;
+  }
 }
 
